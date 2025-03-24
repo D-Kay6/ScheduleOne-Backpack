@@ -1,3 +1,9 @@
+This is a mod for the game Schedule 1 (demo) on Steam:
+https://store.steampowered.com/app/3164500/Schedule_I/
+Nexusmods:
+https://www.nexusmods.com/schedule1/mods/72
+Schedule 1 mods website:
+https://schedule1.evsg.site/mods/20
 Features
 12 additional storage slots for all your items
 Quick access to your backpack with the B key
