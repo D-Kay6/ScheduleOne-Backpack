@@ -1,10 +1,10 @@
 ﻿using HarmonyLib;
 using Il2CppFishNet.Component.Spawning;
 using Il2CppScheduleOne.PlayerScripts;
-using Il2CppScheduleOne.Storage;
+using Il2CppVLB;
 using MelonLoader;
 
-namespace BackpackMod;
+namespace BackpackMod.Patches;
 
 [HarmonyPatch(typeof(PlayerSpawner))]
 public static class PlayerSpawnerPatch
@@ -27,12 +27,7 @@ public static class PlayerSpawnerPatch
             return;
         }
 
-        if (player.LocalGameObject.TryGetComponent<PlayerBackpack>(out _))
-        {
-            Melon<BackpackMod>.Logger.Msg("Player backpack already exists.");
-            return;
-        }
-
-        player.LocalGameObject.AddComponent<PlayerBackpack>();
+        player.gameObject.GetOrAddComponent<BackpackStorage>();
+        player.LocalGameObject.GetOrAddComponent<PlayerBackpack>();
     }
 }
