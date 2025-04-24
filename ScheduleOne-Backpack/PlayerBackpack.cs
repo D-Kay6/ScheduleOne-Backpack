@@ -1,6 +1,5 @@
-﻿using Il2CppScheduleOne.ItemFramework;
-using Il2CppScheduleOne.Persistence.Datas;
-using Il2CppScheduleOne.PlayerScripts;
+﻿using Il2CppScheduleOne.DevUtilities;
+using Il2CppScheduleOne.UI;
 using MelonLoader;
 using UnityEngine;
 
@@ -12,27 +11,25 @@ public class PlayerBackpack : MonoBehaviour
     private const KeyCode ToggleKey = KeyCode.B;
 
     private bool _backpackEnabled = true;
-    private BackpackStorage _backpackStorage;
+    private BackpackStorage _storage;
 
     public PlayerBackpack(IntPtr ptr) : base(ptr)
     {
     }
 
-    public static bool InstanceExists => Instance != null;
+    public static PlayerBackpack Instance { get; private set; }
 
-    public static PlayerBackpack Instance { get; protected set; }
+    public bool IsOpen => Singleton<StorageMenu>.Instance.IsOpen && Singleton<StorageMenu>.Instance.TitleLabel.text == _storage.StorageEntityName;
 
-    public bool IsOpen => _backpackStorage.IsOpen;
-
-    public void Awake()
+    private void Awake()
     {
-        _backpackStorage = gameObject.AddComponent<BackpackStorage>();
+        _storage = gameObject.GetComponentInParent<BackpackStorage>();
         OnStartClient(true);
     }
 
-    public void Update()
+    private void Update()
     {
-        if (!Input.GetKeyDown(ToggleKey))
+        if (!Input.GetKeyDown(ToggleKey) || !_backpackEnabled)
             return;
 
         try
@@ -52,7 +49,7 @@ public class PlayerBackpack : MonoBehaviour
     {
         _backpackEnabled = enabled;
         if (!enabled && IsOpen)
-            _backpackStorage.Close();
+            _storage.Close();
     }
 
     public void Open()
@@ -63,13 +60,7 @@ public class PlayerBackpack : MonoBehaviour
             return;
         }
 
-        if (_backpackStorage == null)
-        {
-            Melon<BackpackMod>.Logger.Error("BackpackStorage is null!");
-            return;
-        }
-
-        _backpackStorage.Open();
+        _storage.Open();
     }
 
     public void Close()
@@ -77,52 +68,7 @@ public class PlayerBackpack : MonoBehaviour
         if (!_backpackEnabled || !IsOpen)
             return;
 
-        _backpackStorage.Close();
-    }
-
-    public string GetBackpackString()
-    {
-        if (_backpackStorage == null)
-        {
-            Melon<BackpackMod>.Logger.Error("BackpackStorage is null!");
-            return string.Empty;
-        }
-
-        return new ItemSet(_backpackStorage.ItemSlots).GetJSON();
-    }
-
-    public void LoadBackpack(string contentsString)
-    {
-        if (string.IsNullOrEmpty(contentsString))
-        {
-            Melon<BackpackMod>.Logger.Warning("Empty backpack string");
-            return;
-        }
-
-        if (!Player.Local.IsOwner || _backpackStorage == null)
-            return;
-
-        var items = ItemSet.Deserialize(contentsString);
-        if (items == null)
-        {
-            Melon<BackpackMod>.Logger.Error("Failed to deserialize backpack string");
-            return;
-        }
-
-        for (var i = 0; i < items.Count; i++)
-        {
-            var item = items[i];
-            if (item == null)
-                continue;
-
-            if (i >= _backpackStorage.SlotCount)
-            {
-                Melon<BackpackMod>.Logger.Error($"Item slot index {i} out of range");
-                break;
-            }
-
-            _backpackStorage.ItemSlots[new Index(i)].Cast<ItemSlot>().SetStoredItem(item);
-        }
+        _storage.Close();
     }
 
     public void OnStartClient(bool isOwner)
