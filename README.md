@@ -37,6 +37,7 @@ Want to help improve the mod? Feel free to reach out on Discord or contribute vi
 
 ## Previous Versions
 
+- **Version 1.5.1** – Fixed the crashes caused by using custom code in networking. (Multiplayer still needs testing.)
 - **Version 1.5.0** – Redesigned the storage system to support saving backpack data for all players in multiplayer.
 - **Version 1.4.0** – Reworked all code to use a custom storage system; made saving work (just the host) in multiplayer.
 - **Version 1.2.0** – Simplified code to focus on UI and slot functionality; added in-game warnings about potential item loss.

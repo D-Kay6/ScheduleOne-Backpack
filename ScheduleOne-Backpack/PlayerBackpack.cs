@@ -1,4 +1,8 @@
 ﻿using Il2CppScheduleOne.DevUtilities;
+using Il2CppScheduleOne.ItemFramework;
+using Il2CppScheduleOne.PlayerScripts;
+using Il2CppScheduleOne.Storage;
+using Il2CppScheduleOne.Tools;
 using Il2CppScheduleOne.UI;
 using MelonLoader;
 using UnityEngine;
@@ -8,10 +12,11 @@ namespace BackpackMod;
 [RegisterTypeInIl2Cpp]
 public class PlayerBackpack : MonoBehaviour
 {
+    public const string StorageName = "Backpack";
     private const KeyCode ToggleKey = KeyCode.B;
 
     private bool _backpackEnabled = true;
-    private BackpackStorage _storage;
+    private StorageEntity _storage;
 
     public PlayerBackpack(IntPtr ptr) : base(ptr)
     {
@@ -19,11 +24,33 @@ public class PlayerBackpack : MonoBehaviour
 
     public static PlayerBackpack Instance { get; private set; }
 
-    public bool IsOpen => Singleton<StorageMenu>.Instance.IsOpen && Singleton<StorageMenu>.Instance.TitleLabel.text == _storage.StorageEntityName;
+    public bool IsOpen => Singleton<StorageMenu>.Instance.IsOpen && Singleton<StorageMenu>.Instance.TitleLabel.text == StorageName;
 
     private void Awake()
     {
-        _storage = gameObject.GetComponentInParent<BackpackStorage>();
+        _storage = gameObject.GetComponentInParent<StorageEntity>();
+        if (_storage == null)
+        {
+            Melon<BackpackMod>.Logger.Error("Player does not have a BackpackStorage component!");
+            return;
+        }
+
+        if (_storage.SlotCount != 12)
+        {
+            Melon<BackpackMod>.Logger.Warning("Backpack storage not initialized. Reinitializing.");
+            _storage.SlotCount = 12;
+            _storage.DisplayRowCount = 3;
+            _storage.StorageEntityName = StorageName;
+            _storage.StorageEntitySubtitle = string.Empty;
+            _storage.MaxAccessDistance = float.PositiveInfinity;
+            for (var i = _storage.ItemSlots.Count; i < _storage.SlotCount; i++)
+            {
+                var itemSlot = new ItemSlot();
+                itemSlot.onItemDataChanged.CombineImpl((Il2CppSystem.Action) _storage.ContentsChanged);
+                _storage.ItemSlots.Add(itemSlot);
+            }
+        }
+
         OnStartClient(true);
     }
 
@@ -47,20 +74,21 @@ public class PlayerBackpack : MonoBehaviour
 
     public void SetBackpackEnabled(bool enabled)
     {
+        if (!enabled)
+            Close();
+
         _backpackEnabled = enabled;
-        if (!enabled && IsOpen)
-            _storage.Close();
     }
 
     public void Open()
     {
-        if (!_backpackEnabled || IsOpen)
-        {
-            Melon<BackpackMod>.Logger.Warning("Backpack is already open or backpack is disabled.");
+        if (!_backpackEnabled || Singleton<ManagementClipboard>.Instance.IsEquipped || Singleton<StorageMenu>.Instance.IsOpen)
             return;
-        }
 
-        _storage.Open();
+        var storageMenu = Singleton<StorageMenu>.Instance;
+        storageMenu.SlotGridLayout.constraintCount = 3;
+        storageMenu.Open(StorageName, string.Empty, _storage.Cast<IItemSlotOwner>());
+        _storage.SendAccessor(Player.Local.NetworkObject);
     }
 
     public void Close()
@@ -68,7 +96,8 @@ public class PlayerBackpack : MonoBehaviour
         if (!_backpackEnabled || !IsOpen)
             return;
 
-        _storage.Close();
+        Singleton<StorageMenu>.Instance.CloseMenu();
+        _storage.SendAccessor(null);
     }
 
     public void OnStartClient(bool isOwner)

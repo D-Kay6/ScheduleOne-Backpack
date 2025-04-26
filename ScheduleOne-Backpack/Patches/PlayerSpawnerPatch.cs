@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Il2CppFishNet.Component.Spawning;
 using Il2CppScheduleOne.PlayerScripts;
+using Il2CppScheduleOne.Storage;
 using Il2CppVLB;
 using MelonLoader;
 
@@ -27,7 +28,11 @@ public static class PlayerSpawnerPatch
             return;
         }
 
-        player.gameObject.GetOrAddComponent<BackpackStorage>();
+        var storage = player.gameObject.GetOrAddComponent<StorageEntity>();
+        storage.SlotCount = 12;
+        storage.DisplayRowCount = 3;
+        storage.StorageEntityName = PlayerBackpack.StorageName;
+        storage.MaxAccessDistance = float.PositiveInfinity;
         player.LocalGameObject.GetOrAddComponent<PlayerBackpack>();
     }
 }

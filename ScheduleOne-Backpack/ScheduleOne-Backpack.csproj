@@ -2,7 +2,6 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
         <PlatformTarget>x64</PlatformTarget>
         <RootNamespace>BackpackMod</RootNamespace>
         <AssemblyName>Backpack</AssemblyName>
@@ -23,7 +22,6 @@
 
     <ItemGroup>
         <Compile Include="BackpackMod.cs"/>
-        <Compile Include="BackpackStorage.cs" />
         <Compile Include="Patches\PlayerManagerPatch.cs" />
         <Compile Include="Patches\PlayerPatch.cs" />
         <Compile Include="Patches\PlayerSpawnerPatch.cs" />
