@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using Il2CppScheduleOne.Money;
 using Il2CppScheduleOne.Persistence;
 using Il2CppScheduleOne.Persistence.Datas;
 using Il2CppScheduleOne.PlayerScripts;
@@ -10,28 +9,24 @@ namespace BackpackMod.Patches;
 [HarmonyPatch(typeof(Player))]
 public static class PlayerPatch
 {
-    [HarmonyPatch("NetworkInitializeIfDisabled")]
-    [HarmonyPrefix]
-    public static void NetworkInitializeIfDisabled(Player __instance)
-    {
-        var backpackStorage = __instance.GetBackpackStorage();
-        if (backpackStorage == null)
-            return;
-
-        backpackStorage.NetworkInitializeIfDisabled_Internal();
-    }
-
     [HarmonyPatch("Awake")]
     [HarmonyPrefix]
     public static void Awake(Player __instance)
     {
-        if (__instance.LocalExtraFiles.Contains("Backpack"))
+        var backpackStorage = __instance.GetBackpackStorage();
+        if (backpackStorage)
         {
-            Melon<BackpackMod>.Logger.Msg("Player already has backpack data.");
-            return;
+            // Failsafe
+            backpackStorage.SlotCount = 12;
+            backpackStorage.DisplayRowCount = 3;
+            backpackStorage.StorageEntityName = PlayerBackpack.StorageName;
+            backpackStorage.MaxAccessDistance = float.PositiveInfinity;
         }
 
-        Melon<BackpackMod>.Logger.Msg("Adding backpack data to player.");
+        if (__instance.LocalExtraFiles.Contains("Backpack"))
+            return;
+
+        Melon<BackpackMod>.Logger.Msg("Registering backpack file for player.");
         __instance.LocalExtraFiles.Add("Backpack");
     }
 
@@ -40,32 +35,23 @@ public static class PlayerPatch
     public static void WriteData(Player __instance, string parentFolderPath)
     {
         var backpackStorage = __instance.GetBackpackStorage();
-        __instance.Cast<ISaveable>().WriteSubfile(parentFolderPath, "Backpack", backpackStorage.GetContentString());
-    }
-
-    [HarmonyPatch("GetNetworth")]
-    [HarmonyPostfix]
-    public static void GetNetworth(Player __instance, MoneyManager.FloatContainer container)
-    {
-        var backpackStorage = __instance.GetBackpackStorage();
-        if (backpackStorage == null)
-            return;
-
-        backpackStorage.GetNetworth(container);
+        var contents = new ItemSet(backpackStorage.ItemSlots).GetJSON();
+        __instance.Cast<ISaveable>().WriteSubfile(parentFolderPath, "Backpack", contents);
     }
 
     [HarmonyPatch("Load", typeof(PlayerData), typeof(string))]
     [HarmonyPrefix]
     public static void Load(Player __instance, PlayerData data, string containerPath)
     {
-        if (!__instance.Loader.TryLoadFile(containerPath, "Backpack", out var contentsString))
+        if (!__instance.Loader.TryLoadFile(containerPath, "Backpack", out var backpackData))
             return;
 
         Melon<BackpackMod>.Logger.Msg("Loading local backpack data.");
         try
         {
             var backpackStorage = __instance.GetBackpackStorage();
-            backpackStorage.LoadContents(contentsString);
+            var itemSet = ItemSet.Deserialize(backpackData);
+            backpackStorage.LoadFromItemSet(itemSet);
         }
         catch (Exception e)
         {
@@ -96,7 +82,8 @@ public static class PlayerPatch
         try
         {
             var backpackStorage = __instance.GetBackpackStorage();
-            backpackStorage.LoadContents(backpackData);
+            var itemSet = ItemSet.Deserialize(backpackData);
+            backpackStorage.LoadFromItemSet(itemSet);
         }
         catch (Exception e)
         {

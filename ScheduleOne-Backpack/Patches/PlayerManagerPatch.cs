@@ -2,6 +2,7 @@
 using Il2CppScheduleOne.Persistence.Datas;
 using Il2CppScheduleOne.Persistence.Loaders;
 using Il2CppScheduleOne.PlayerScripts;
+using MelonLoader;
 
 namespace BackpackMod.Patches;
 
@@ -10,15 +11,18 @@ public static class PlayerManagerPatch
 {
     [HarmonyPatch("TryGetPlayerData")]
     [HarmonyPostfix]
-    public static void TryGetPlayerData(ref PlayerManager __instance, ref bool __result, string playerCode, PlayerData data, ref string inventoryString)
+    public static void TryGetPlayerData(PlayerManager __instance, PlayerData data, ref string inventoryString)
     {
-        if (!__result)
+        if (data == null)
             return;
 
         var dataPath = (Il2CppSystem.String) __instance.loadedPlayerDataPaths[new Index(__instance.loadedPlayerData.IndexOf(data))];
         var loader = new PlayerLoader();
         if (!loader.TryLoadFile(dataPath, "Backpack", out var backpackString))
+        {
+            Melon<BackpackMod>.Logger.Warning("Failed to load player backpack under " + dataPath);
             return;
+        }
 
         inventoryString += "|||" + backpackString;
     }
