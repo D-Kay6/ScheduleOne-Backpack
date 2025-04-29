@@ -4,6 +4,7 @@ using ScheduleOne.PlayerScripts;
 using ScheduleOne.Storage;
 using ScheduleOne.Tools;
 using ScheduleOne.UI;
+using ScheduleOne.UI.Phone;
 using UnityEngine;
 
 namespace BackpackMod;
@@ -81,7 +82,7 @@ public class PlayerBackpack : MonoBehaviour
 
     public void Open()
     {
-        if (!_backpackEnabled || Singleton<ManagementClipboard>.Instance.IsEquipped || Singleton<StorageMenu>.Instance.IsOpen)
+        if (!_backpackEnabled || Singleton<ManagementClipboard>.Instance.IsEquipped || Singleton<StorageMenu>.Instance.IsOpen || Phone.instance.IsOpen)
             return;
 
         var storageMenu = Singleton<StorageMenu>.Instance;
