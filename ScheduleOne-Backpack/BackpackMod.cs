@@ -6,7 +6,7 @@ using Il2CppInterop.Runtime.Injection;
 
 namespace BackpackMod;
 
-[BepInPlugin("dkay.schedule1.backpackk", "BackpackMod", "1.5.1")]
+[BepInPlugin("dkay.schedule1.backpack", "BackpackMod", "1.5.1")]
 public class BackpackMod : BasePlugin
 {
     internal static new ManualLogSource Log;
@@ -18,7 +18,7 @@ public class BackpackMod : BasePlugin
 
         ClassInjector.RegisterTypeInIl2Cpp<PlayerBackpack>();
 
-        harmony = new Harmony($"dkay.schedule1.backpack");
+        harmony = new Harmony("dkay.schedule1.backpack");
         harmony.PatchAll();
     }
 }
