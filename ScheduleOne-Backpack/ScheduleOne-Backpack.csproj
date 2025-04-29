@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -7,12 +7,18 @@
         <AssemblyName>Backpack</AssemblyName>
         <IsPackable>false</IsPackable>
         <LangVersion>latest</LangVersion>
+		<RestoreAdditionalProjectSources>
+			https://api.nuget.org/v3/index.json;
+			https://nuget.bepinex.dev/v3/index.json;
+			https://nuget.samboy.dev/v3/index.json
+		</RestoreAdditionalProjectSources>
+		<GameBaseDir>C:\Program Files (x86)\Steam\steamapps\common\Schedule I</GameBaseDir>
+		<GameAssemblyDir>$(GameBaseDir)\BepInEx\interop</GameAssemblyDir>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="HarmonyX" Version="2.14.0"/>
-        <PackageReference Include="Il2CppInterop.Runtime" Version="1.4.5"/>
-        <PackageReference Include="LavaGang.MelonLoader" Version="0.7.0"/>
+		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be*" />
+		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -31,46 +37,47 @@
 
     <ItemGroup>
       <Reference Include="Assembly-CSharp">
-        <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll</HintPath>
+        <HintPath>$(GameAssemblyDir)\Assembly-CSharp.dll</HintPath>
         <Private>False</Private>
       </Reference>
-      <Reference Include="Il2CppFishNet.Runtime">
-        <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\Il2CppFishNet.Runtime.dll</HintPath>
+      <Reference Include="FishNet.Runtime">
+        <HintPath>$(GameAssemblyDir)\FishNet.Runtime.dll</HintPath>
         <Private>False</Private>
       </Reference>
       <Reference Include="Il2Cppmscorlib">
-        <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\Il2Cppmscorlib.dll</HintPath>
+        <HintPath>$(GameAssemblyDir)\Il2Cppmscorlib.dll</HintPath>
         <Private>False</Private>
       </Reference>
       <Reference Include="Il2CppSystem.Core">
-        <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\Il2CppSystem.Core.dll</HintPath>
+        <HintPath>$(GameAssemblyDir)\Il2CppSystem.Core.dll</HintPath>
         <Private>False</Private>
       </Reference>
-      <Reference Include="Il2CppNewtonsoft.Json">
-        <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\Il2CppNewtonsoft.Json.dll</HintPath>
+      <Reference Include="Newtonsoft.Json">
+        <HintPath>$(GameAssemblyDir)\Newtonsoft.Json.dll</HintPath>
+		  <Private>false</Private>
       </Reference>
       <Reference Include="Unity.InputSystem">
-        <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\Unity.InputSystem.dll</HintPath>
+        <HintPath>$(GameAssemblyDir)\Unity.InputSystem.dll</HintPath>
         <Private>False</Private>
       </Reference>
       <Reference Include="Unity.TextMeshPro">
-        <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\Unity.TextMeshPro.dll</HintPath>
+        <HintPath>$(GameAssemblyDir)\Unity.TextMeshPro.dll</HintPath>
         <Private>False</Private>
       </Reference>
       <Reference Include="UnityEngine">
-        <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\UnityEngine.dll</HintPath>
+        <HintPath>$(GameAssemblyDir)\UnityEngine.dll</HintPath>
         <Private>False</Private>
       </Reference>
       <Reference Include="UnityEngine.CoreModule">
-        <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll</HintPath>
+        <HintPath>$(GameAssemblyDir)\UnityEngine.CoreModule.dll</HintPath>
         <Private>False</Private>
       </Reference>
       <Reference Include="UnityEngine.InputLegacyModule">
-        <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\UnityEngine.InputLegacyModule.dll</HintPath>
+        <HintPath>$(GameAssemblyDir)\UnityEngine.InputLegacyModule.dll</HintPath>
         <Private>False</Private>
       </Reference>
       <Reference Include="UnityEngine.UI">
-        <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\UnityEngine.UI.dll</HintPath>
+        <HintPath>$(GameAssemblyDir)\UnityEngine.UI.dll</HintPath>
         <Private>False</Private>
       </Reference>
     </ItemGroup>

@@ -1,9 +1,8 @@
 ﻿using HarmonyLib;
-using Il2CppFishNet.Component.Spawning;
-using Il2CppScheduleOne.PlayerScripts;
-using Il2CppScheduleOne.Storage;
-using Il2CppVLB;
-using MelonLoader;
+using FishNet.Component.Spawning;
+using ScheduleOne.PlayerScripts;
+using ScheduleOne.Storage;
+using VLB;
 
 namespace BackpackMod.Patches;
 
@@ -17,14 +16,14 @@ public static class PlayerSpawnerPatch
         var playerPrefab = __instance._playerPrefab;
         if (!playerPrefab)
         {
-            Melon<BackpackMod>.Logger.Error("Player prefab is null!");
+            BackpackMod.Log.LogError("Player prefab is null!");
             return;
         }
 
         var player = playerPrefab.GetComponent<Player>();
         if (player == null)
         {
-            Melon<BackpackMod>.Logger.Error("Player prefab does not have a Player component!");
+            BackpackMod.Log.LogError("Player prefab does not have a Player component!");
             return;
         }
 

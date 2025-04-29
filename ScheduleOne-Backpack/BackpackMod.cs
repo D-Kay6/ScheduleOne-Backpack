@@ -1,16 +1,24 @@
-using System.Reflection;
-using MelonLoader;
-
-[assembly: MelonInfo(typeof(BackpackMod.BackpackMod), "BackpackMod", "1.5.1", "D-Kay", "https://www.nexusmods.com/schedule1/mods/818")]
-[assembly: MelonGame("TVGS", "Schedule I")]
-[assembly: AssemblyMetadata("NexusModID", "818")]
+using BepInEx;
+using BepInEx.Logging;
+using BepInEx.Unity.IL2CPP;
+using HarmonyLib;
+using Il2CppInterop.Runtime.Injection;
 
 namespace BackpackMod;
 
-public class BackpackMod : MelonMod
+[BepInPlugin("D-Kay-PlayerBackpack", "BackpackMod", "1.5.1")]
+public class BackpackMod : BasePlugin
 {
-    public override void OnInitializeMelon()
+    internal static new ManualLogSource Log;
+    private static Harmony harmony;
+    public override void Load()
     {
-        Melon<BackpackMod>.Logger.Msg("BackpackMod initialized.");
+        Log = base.Log;
+        Log.LogInfo("BackpackMod initialized.");
+
+        ClassInjector.RegisterTypeInIl2Cpp<PlayerBackpack>();
+
+        harmony = new Harmony($"D-Kay-PlayerBackpack");
+        harmony.PatchAll();
     }
 }

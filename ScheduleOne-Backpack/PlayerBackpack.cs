@@ -1,15 +1,13 @@
-﻿using Il2CppScheduleOne.DevUtilities;
-using Il2CppScheduleOne.ItemFramework;
-using Il2CppScheduleOne.PlayerScripts;
-using Il2CppScheduleOne.Storage;
-using Il2CppScheduleOne.Tools;
-using Il2CppScheduleOne.UI;
-using MelonLoader;
+﻿using ScheduleOne.DevUtilities;
+using ScheduleOne.ItemFramework;
+using ScheduleOne.PlayerScripts;
+using ScheduleOne.Storage;
+using ScheduleOne.Tools;
+using ScheduleOne.UI;
 using UnityEngine;
 
 namespace BackpackMod;
 
-[RegisterTypeInIl2Cpp]
 public class PlayerBackpack : MonoBehaviour
 {
     public const string StorageName = "Backpack";
@@ -20,6 +18,7 @@ public class PlayerBackpack : MonoBehaviour
 
     public PlayerBackpack(IntPtr ptr) : base(ptr)
     {
+
     }
 
     public static PlayerBackpack Instance { get; private set; }
@@ -31,13 +30,13 @@ public class PlayerBackpack : MonoBehaviour
         _storage = gameObject.GetComponentInParent<StorageEntity>();
         if (_storage == null)
         {
-            Melon<BackpackMod>.Logger.Error("Player does not have a BackpackStorage component!");
+            BackpackMod.Log.LogError("Player does not have a BackpackStorage component!");
             return;
         }
 
         if (_storage.SlotCount != 12)
         {
-            Melon<BackpackMod>.Logger.Warning("Backpack storage not initialized. Reinitializing.");
+            BackpackMod.Log.LogWarning("Backpack storage not initialized. Reinitializing.");
             _storage.SlotCount = 12;
             _storage.DisplayRowCount = 3;
             _storage.StorageEntityName = StorageName;
@@ -68,7 +67,7 @@ public class PlayerBackpack : MonoBehaviour
         }
         catch (Exception e)
         {
-            Melon<BackpackMod>.Logger.Error("Error toggling backpack: " + e.Message);
+            BackpackMod.Log.LogError("Error toggling backpack: " + e.Message);
         }
     }
 
@@ -104,14 +103,14 @@ public class PlayerBackpack : MonoBehaviour
     {
         if (!isOwner)
         {
-            Melon<BackpackMod>.Logger.Msg("Destroying non-local player singleton: " + name, null);
+            BackpackMod.Log.LogInfo("Destroying non-local player singleton: " + name);
             Destroy(this);
             return;
         }
 
         if (Instance != null)
         {
-            Melon<BackpackMod>.Logger.Warning("Multiple instances of " + name + " exist. Keeping prior instance reference.", null);
+            BackpackMod.Log.LogWarning("Multiple instances of " + name + " exist. Keeping prior instance reference.");
             return;
         }
 
