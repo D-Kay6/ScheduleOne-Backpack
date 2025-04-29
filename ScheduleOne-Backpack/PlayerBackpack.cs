@@ -4,6 +4,7 @@ using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Storage;
 using Il2CppScheduleOne.Tools;
 using Il2CppScheduleOne.UI;
+using Il2CppScheduleOne.UI.Phone;
 using MelonLoader;
 using UnityEngine;
 
@@ -82,7 +83,7 @@ public class PlayerBackpack : MonoBehaviour
 
     public void Open()
     {
-        if (!_backpackEnabled || Singleton<ManagementClipboard>.Instance.IsEquipped || Singleton<StorageMenu>.Instance.IsOpen)
+        if (!_backpackEnabled || Singleton<ManagementClipboard>.Instance.IsEquipped || Singleton<StorageMenu>.Instance.IsOpen || Phone.instance.IsOpen)
             return;
 
         var storageMenu = Singleton<StorageMenu>.Instance;
