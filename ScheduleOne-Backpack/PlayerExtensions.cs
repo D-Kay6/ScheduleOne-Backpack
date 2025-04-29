@@ -1,5 +1,5 @@
-﻿using Il2CppScheduleOne.PlayerScripts;
-using Il2CppScheduleOne.Storage;
+﻿using ScheduleOne.PlayerScripts;
+using ScheduleOne.Storage;
 
 namespace BackpackMod;
 

@@ -1,8 +1,7 @@
 ﻿using HarmonyLib;
-using Il2CppScheduleOne.Persistence.Datas;
-using Il2CppScheduleOne.Persistence.Loaders;
-using Il2CppScheduleOne.PlayerScripts;
-using MelonLoader;
+using ScheduleOne.Persistence.Datas;
+using ScheduleOne.Persistence.Loaders;
+using ScheduleOne.PlayerScripts;
 
 namespace BackpackMod.Patches;
 
@@ -20,7 +19,7 @@ public static class PlayerManagerPatch
         var loader = new PlayerLoader();
         if (!loader.TryLoadFile(dataPath, "Backpack", out var backpackString))
         {
-            Melon<BackpackMod>.Logger.Warning("Failed to load player backpack under " + dataPath);
+            BackpackMod.Log.LogWarning("Failed to load player backpack under " + dataPath);
             return;
         }
 

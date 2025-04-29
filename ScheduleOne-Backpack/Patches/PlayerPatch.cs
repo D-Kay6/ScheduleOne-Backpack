@@ -1,8 +1,7 @@
 ﻿using HarmonyLib;
-using Il2CppScheduleOne.Persistence;
-using Il2CppScheduleOne.Persistence.Datas;
-using Il2CppScheduleOne.PlayerScripts;
-using MelonLoader;
+using ScheduleOne.Persistence;
+using ScheduleOne.Persistence.Datas;
+using ScheduleOne.PlayerScripts;
 
 namespace BackpackMod.Patches;
 
@@ -26,7 +25,7 @@ public static class PlayerPatch
         if (__instance.LocalExtraFiles.Contains("Backpack"))
             return;
 
-        Melon<BackpackMod>.Logger.Msg("Registering backpack file for player.");
+        BackpackMod.Log.LogInfo("Registering backpack file for player.");
         __instance.LocalExtraFiles.Add("Backpack");
     }
 
@@ -46,7 +45,7 @@ public static class PlayerPatch
         if (!__instance.Loader.TryLoadFile(containerPath, "Backpack", out var backpackData))
             return;
 
-        Melon<BackpackMod>.Logger.Msg("Loading local backpack data.");
+        BackpackMod.Log.LogInfo("Loading local backpack data.");
         try
         {
             var backpackStorage = __instance.GetBackpackStorage();
@@ -55,7 +54,7 @@ public static class PlayerPatch
         }
         catch (Exception e)
         {
-            Melon<BackpackMod>.Logger.Error($"Error loading backpack data: {e.Message}");
+            BackpackMod.Log.LogError($"Error loading backpack data: {e.Message}");
         }
     }
 
@@ -68,7 +67,7 @@ public static class PlayerPatch
 
         if (!__instance.IsOwner)
         {
-            Melon<BackpackMod>.Logger.Msg("Not the owner, skipping backpack data load.");
+            BackpackMod.Log.LogInfo("Not the owner, skipping backpack data load.");
             return;
         }
 
@@ -78,7 +77,7 @@ public static class PlayerPatch
 
         contentsString = backpackString[0];
         var backpackData = backpackString[1];
-        Melon<BackpackMod>.Logger.Msg("Loading backpack data from network.");
+        BackpackMod.Log.LogInfo("Loading backpack data from network.");
         try
         {
             var backpackStorage = __instance.GetBackpackStorage();
@@ -87,7 +86,7 @@ public static class PlayerPatch
         }
         catch (Exception e)
         {
-            Melon<BackpackMod>.Logger.Error($"Error loading backpack data: {e.Message}");
+            BackpackMod.Log.LogError($"Error loading backpack data: {e.Message}");
         }
     }
 
@@ -95,7 +94,7 @@ public static class PlayerPatch
     [HarmonyPrefix]
     public static void Activate()
     {
-        Melon<BackpackMod>.Logger.Msg("Activating backpack");
+        BackpackMod.Log.LogInfo("Activating backpack");
         PlayerBackpack.Instance.SetBackpackEnabled(true);
     }
 
@@ -103,7 +102,7 @@ public static class PlayerPatch
     [HarmonyPrefix]
     public static void Deactivate()
     {
-        Melon<BackpackMod>.Logger.Msg("Deactivating backpack");
+        BackpackMod.Log.LogInfo("Deactivating backpack");
         PlayerBackpack.Instance.SetBackpackEnabled(false);
     }
 
@@ -111,7 +110,7 @@ public static class PlayerPatch
     [HarmonyPrefix]
     public static void ExitAll()
     {
-        Melon<BackpackMod>.Logger.Msg("Exiting all backpacks");
+        BackpackMod.Log.LogInfo("Exiting all backpacks");
         PlayerBackpack.Instance.SetBackpackEnabled(false);
     }
 
@@ -122,7 +121,7 @@ public static class PlayerPatch
         if (!__instance.Owner.IsLocalClient)
             return;
 
-        Melon<BackpackMod>.Logger.Msg("Player died, disabling backpack");
+        BackpackMod.Log.LogInfo("Player died, disabling backpack");
         PlayerBackpack.Instance.SetBackpackEnabled(false);
     }
 }
