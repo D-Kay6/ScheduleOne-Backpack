@@ -1,5 +1,6 @@
 ﻿using Il2CppScheduleOne.DevUtilities;
 using Il2CppScheduleOne.ItemFramework;
+using Il2CppScheduleOne.Levelling;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Storage;
 using Il2CppScheduleOne.Tools;
@@ -8,13 +9,12 @@ using Il2CppScheduleOne.UI.Phone;
 using MelonLoader;
 using UnityEngine;
 
-namespace BackpackMod;
+namespace Backpack;
 
 [RegisterTypeInIl2Cpp]
 public class PlayerBackpack : MonoBehaviour
 {
     public const string StorageName = "Backpack";
-    private const KeyCode ToggleKey = KeyCode.B;
 
     private bool _backpackEnabled = true;
     private StorageEntity _storage;
@@ -25,6 +25,7 @@ public class PlayerBackpack : MonoBehaviour
 
     public static PlayerBackpack Instance { get; private set; }
 
+    public bool IsUnlocked => NetworkSingleton<LevelManager>.Instance.GetFullRank() >= Configuration.Instance.UnlockLevel;
     public bool IsOpen => Singleton<StorageMenu>.Instance.IsOpen && Singleton<StorageMenu>.Instance.TitleLabel.text == StorageName;
 
     private void Awake()
@@ -32,24 +33,8 @@ public class PlayerBackpack : MonoBehaviour
         _storage = gameObject.GetComponentInParent<StorageEntity>();
         if (_storage == null)
         {
-            Melon<BackpackMod>.Logger.Error("Player does not have a BackpackStorage component!");
+            Logger.Error("Player does not have a BackpackStorage component!");
             return;
-        }
-
-        if (_storage.SlotCount != 12)
-        {
-            Melon<BackpackMod>.Logger.Warning("Backpack storage not initialized. Reinitializing.");
-            _storage.SlotCount = 12;
-            _storage.DisplayRowCount = 3;
-            _storage.StorageEntityName = StorageName;
-            _storage.StorageEntitySubtitle = string.Empty;
-            _storage.MaxAccessDistance = float.PositiveInfinity;
-            for (var i = _storage.ItemSlots.Count; i < _storage.SlotCount; i++)
-            {
-                var itemSlot = new ItemSlot();
-                itemSlot.onItemDataChanged.CombineImpl((Il2CppSystem.Action) _storage.ContentsChanged);
-                _storage.ItemSlots.Add(itemSlot);
-            }
         }
 
         OnStartClient(true);
@@ -57,7 +42,7 @@ public class PlayerBackpack : MonoBehaviour
 
     private void Update()
     {
-        if (!Input.GetKeyDown(ToggleKey) || !_backpackEnabled)
+        if (!_backpackEnabled || !IsUnlocked || !Input.GetKeyDown(Configuration.Instance.ToggleKey))
             return;
 
         try
@@ -69,7 +54,7 @@ public class PlayerBackpack : MonoBehaviour
         }
         catch (Exception e)
         {
-            Melon<BackpackMod>.Logger.Error("Error toggling backpack: " + e.Message);
+            Logger.Error("Error toggling backpack: " + e.Message);
         }
     }
 
@@ -83,11 +68,11 @@ public class PlayerBackpack : MonoBehaviour
 
     public void Open()
     {
-        if (!_backpackEnabled || Singleton<ManagementClipboard>.Instance.IsEquipped || Singleton<StorageMenu>.Instance.IsOpen || Phone.instance.IsOpen)
+        if (!_backpackEnabled || !IsUnlocked || Singleton<ManagementClipboard>.Instance.IsEquipped || Singleton<StorageMenu>.Instance.IsOpen || Phone.instance.IsOpen)
             return;
 
         var storageMenu = Singleton<StorageMenu>.Instance;
-        storageMenu.SlotGridLayout.constraintCount = 3;
+        storageMenu.SlotGridLayout.constraintCount = _storage.DisplayRowCount;
         storageMenu.Open(StorageName, string.Empty, _storage.Cast<IItemSlotOwner>());
         _storage.SendAccessor(Player.Local.NetworkObject);
     }
@@ -105,14 +90,14 @@ public class PlayerBackpack : MonoBehaviour
     {
         if (!isOwner)
         {
-            Melon<BackpackMod>.Logger.Msg("Destroying non-local player singleton: " + name, null);
+            Logger.Info("Destroying non-local player singleton: " + name, null);
             Destroy(this);
             return;
         }
 
         if (Instance != null)
         {
-            Melon<BackpackMod>.Logger.Warning("Multiple instances of " + name + " exist. Keeping prior instance reference.", null);
+            Logger.Warning("Multiple instances of " + name + " exist. Keeping prior instance reference.", null);
             return;
         }
 

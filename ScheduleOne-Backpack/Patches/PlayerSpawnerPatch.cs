@@ -3,9 +3,8 @@ using Il2CppFishNet.Component.Spawning;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Storage;
 using Il2CppVLB;
-using MelonLoader;
 
-namespace BackpackMod.Patches;
+namespace Backpack.Patches;
 
 [HarmonyPatch(typeof(PlayerSpawner))]
 public static class PlayerSpawnerPatch
@@ -17,22 +16,29 @@ public static class PlayerSpawnerPatch
         var playerPrefab = __instance._playerPrefab;
         if (!playerPrefab)
         {
-            Melon<BackpackMod>.Logger.Error("Player prefab is null!");
+            Logger.Error("Player prefab is null!");
             return;
         }
 
         var player = playerPrefab.GetComponent<Player>();
         if (player == null)
         {
-            Melon<BackpackMod>.Logger.Error("Player prefab does not have a Player component!");
+            Logger.Error("Player prefab does not have a Player component!");
             return;
         }
 
         var storage = player.gameObject.GetOrAddComponent<StorageEntity>();
-        storage.SlotCount = 12;
-        storage.DisplayRowCount = 3;
+        storage.SlotCount = Configuration.Instance.StorageSlots;
+        storage.DisplayRowCount = storage.SlotCount switch
+        {
+            <= 5 => 1,
+            <= 10 => 2,
+            <= 15 => 3,
+            _ => 4
+        };
         storage.StorageEntityName = PlayerBackpack.StorageName;
         storage.MaxAccessDistance = float.PositiveInfinity;
+
         player.LocalGameObject.GetOrAddComponent<PlayerBackpack>();
     }
 }

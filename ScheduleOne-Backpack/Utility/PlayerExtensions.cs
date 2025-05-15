@@ -1,7 +1,7 @@
 ﻿using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Storage;
 
-namespace BackpackMod;
+namespace Backpack;
 
 public static class PlayerExtensions
 {

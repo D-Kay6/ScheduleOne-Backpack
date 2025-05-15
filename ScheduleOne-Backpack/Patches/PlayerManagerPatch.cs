@@ -2,9 +2,8 @@
 using Il2CppScheduleOne.Persistence.Datas;
 using Il2CppScheduleOne.Persistence.Loaders;
 using Il2CppScheduleOne.PlayerScripts;
-using MelonLoader;
 
-namespace BackpackMod.Patches;
+namespace Backpack.Patches;
 
 [HarmonyPatch(typeof(PlayerManager))]
 public static class PlayerManagerPatch
@@ -20,7 +19,7 @@ public static class PlayerManagerPatch
         var loader = new PlayerLoader();
         if (!loader.TryLoadFile(dataPath, "Backpack", out var backpackString))
         {
-            Melon<BackpackMod>.Logger.Warning("Failed to load player backpack under " + dataPath);
+            Logger.Warning("Failed to load player backpack under " + dataPath);
             return;
         }
 
