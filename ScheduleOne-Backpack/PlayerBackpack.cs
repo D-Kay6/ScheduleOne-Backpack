@@ -15,6 +15,7 @@ namespace Backpack;
 public class PlayerBackpack : MonoBehaviour
 {
     public const string StorageName = "Backpack";
+    public const int MaxStorageSlots = 128;
 
     private bool _backpackEnabled = true;
     private StorageEntity _storage;
@@ -86,7 +87,40 @@ public class PlayerBackpack : MonoBehaviour
         _storage.SendAccessor(null);
     }
 
-    public void OnStartClient(bool isOwner)
+    /// <summary>
+    /// Adds the specified number of slots to the backpack.
+    /// </summary>
+    /// <remarks>The maximum number of slots for storage is 128.</remarks>
+    /// <param name="slotCount">The number of slots to add.</param>
+    public void Upgrade(int slotCount)
+    {
+        if (slotCount is < 1 or > MaxStorageSlots)
+            return;
+
+        var newSlotCount = _storage.SlotCount + slotCount;
+        if (newSlotCount > MaxStorageSlots)
+        {
+            Logger.Warning("Cannot upgrade backpack to more than {0} slots.", MaxStorageSlots);
+            return;
+        }
+
+        _storage.SlotCount = newSlotCount;
+        _storage.DisplayRowCount = newSlotCount switch
+        {
+            <= 20 => (int) Math.Ceiling(newSlotCount / 5.0),
+            <= 80 => (int) Math.Ceiling(newSlotCount / 10.0),
+            _ => (int) Math.Ceiling(newSlotCount / 16.0)
+        };
+
+        for (var i = _storage.ItemSlots.Count; i < newSlotCount; i++)
+        {
+            var itemSlot = new ItemSlot();
+            itemSlot.onItemDataChanged.CombineImpl((Il2CppSystem.Action) _storage.ContentsChanged);
+            itemSlot.SetSlotOwner(_storage.Cast<IItemSlotOwner>());
+        }
+    }
+
+    private void OnStartClient(bool isOwner)
     {
         if (!isOwner)
         {
@@ -104,7 +138,7 @@ public class PlayerBackpack : MonoBehaviour
         Instance = this;
     }
 
-    public void OnDestroy()
+    private void OnDestroy()
     {
         if (Instance == this)
         {

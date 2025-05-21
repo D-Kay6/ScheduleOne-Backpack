@@ -24,10 +24,13 @@
     <ItemGroup>
         <Compile Include="BackpackMod.cs"/>
         <Compile Include="Configuration.cs" />
+        <Compile Include="Patches\CartPatch.cs" />
         <Compile Include="Patches\LevelManagerPatch.cs" />
         <Compile Include="Patches\PlayerManagerPatch.cs" />
         <Compile Include="Patches\PlayerPatch.cs" />
         <Compile Include="Patches\PlayerSpawnerPatch.cs" />
+        <Compile Include="Patches\ShopInterfacePatch.cs" />
+        <Compile Include="Patches\StorageMenuPatch.cs" />
         <Compile Include="PlayerBackpack.cs" />
         <Compile Include="Utility\Logger.cs" />
         <Compile Include="Utility\PlayerExtensions.cs" />

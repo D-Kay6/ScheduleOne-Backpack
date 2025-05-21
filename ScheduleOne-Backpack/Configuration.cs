@@ -45,7 +45,7 @@ public class Configuration
     }
 
     public FullRank UnlockLevel => new(_unlockLevelEntry.Value.Rank, Math.Clamp(_unlockLevelEntry.Value.Tier, 1, 5));
-    public int StorageSlots => Math.Clamp(_storageSlotsEntry.Value, 1, 20);
+    public int StorageSlots => Math.Clamp(_storageSlotsEntry.Value, 1, PlayerBackpack.MaxStorageSlots);
 
     public void Load()
     {

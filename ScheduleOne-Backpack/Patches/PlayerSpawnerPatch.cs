@@ -31,10 +31,9 @@ public static class PlayerSpawnerPatch
         storage.SlotCount = Configuration.Instance.StorageSlots;
         storage.DisplayRowCount = storage.SlotCount switch
         {
-            <= 5 => 1,
-            <= 10 => 2,
-            <= 15 => 3,
-            _ => 4
+            <= 20 => (int) Math.Ceiling(storage.SlotCount / 5.0),
+            <= 80 => (int) Math.Ceiling(storage.SlotCount / 10.0),
+            _ => (int) Math.Ceiling(storage.SlotCount / 16.0)
         };
         storage.StorageEntityName = PlayerBackpack.StorageName;
         storage.MaxAccessDistance = float.PositiveInfinity;
