@@ -5,28 +5,24 @@ A storage expansion modification for Schedule I available on [Steam](https://sto
 ## Features
 
 - **Portable Storage Solution** – Carry extra items with you anywhere in the game.
-- **Persistent Saving** – Backpack contents are now saved between game sessions.
-- **Easy Access** – Open the backpack with a single keypress (default is **B**, ~~configurable via a `config.ini` file~~).
-- **Fixed Layout** – Always organized in a 4×3 grid (12 slots); saved data is remapped to fit this layout.
+- **Persistent Saving** – Backpack contents are now saved between game sessions, even in multiplayer.
+- **Easy Access** – Open the backpack with a single keypress (default is **B**, configurable via the `UserData/backpack.cfg` file).
+- **Flexible Layout** – Adapts the storage grid to fit the set storage slots.
 - **Seamless Integration** – Uses the game’s native storage UI.
 - **Lightweight Implementation** – Minimal impact on performance.
 
 ## Installation
 
 1. Ensure [MelonLoader](https://melonwiki.xyz/wiki/MelonLoader) is installed on your game.
-2. Download the `BackpackMod.dll` file.
+2. Download the `Backpack.dll` file.
 3. Place the DLL in your Schedule I Mods folder.
-4. ~~*(Optional)* Adjust the key binding by editing the `config.ini` file located in the “BackpackMod” folder (which is automatically created next to the DLL).~~
+4. *(Optional)* Adjust the key binding by editing the `backpack.cfg` file located in the “UserData” folder.
 5. Launch the game.
 
 ## Usage Guide
 
 - **Toggle Backpack:** Press the configured key (default: **B**) to open or close the backpack interface.
 - **Item Management:** Drag and drop items between your main inventory and the backpack.
-
-## Known Issues
-
-- **Missing configuration:** There is no way to configure the key binding for opening the backpack. The default is **B**.
 
 ## Credits & Collaboration
 
@@ -37,7 +33,9 @@ Want to help improve the mod? Feel free to reach out on Discord or contribute vi
 
 ## Previous Versions
 
-- **Version 1.5.1** – Fixed the crashes caused by using custom code in networking. (Multiplayer still needs testing.)
+- **Version 1.7.0** – Added support for more than 20 slots in backpack; added support for using the backpack first when buying more items than your intentory can hold; added configurable backpack search to police behaviour.
+- **Version 1.6.0** – Made multiple settings configurable; added a level requirement for using the backpack.
+- **Version 1.5.1** – Fixed the crashes caused by using custom code in networking.
 - **Version 1.5.0** – Redesigned the storage system to support saving backpack data for all players in multiplayer.
 - **Version 1.4.0** – Reworked all code to use a custom storage system; made saving work (just the host) in multiplayer.
 - **Version 1.2.0** – Simplified code to focus on UI and slot functionality; added in-game warnings about potential item loss.
