@@ -24,6 +24,7 @@
     <ItemGroup>
         <Compile Include="BackpackMod.cs"/>
         <Compile Include="Configuration.cs" />
+        <Compile Include="Patches\BodySearchBehaviourPatch.cs" />
         <Compile Include="Patches\CartPatch.cs" />
         <Compile Include="Patches\LevelManagerPatch.cs" />
         <Compile Include="Patches\PlayerManagerPatch.cs" />

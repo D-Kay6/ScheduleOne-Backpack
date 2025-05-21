@@ -24,7 +24,7 @@ public class Configuration
         _generalCategory = MelonPreferences.CreateCategory("General");
         _generalCategory.SetFilePath(_configFile, false);
         _toggleKeyEntry = _generalCategory.CreateEntry("ToggleKey", KeyCode.B, "Key to toggle backpack");
-        _enableSearchEntry = _generalCategory.CreateEntry("EnableSearch", false, "Enable police search for backpack items", null, true, true);
+        _enableSearchEntry = _generalCategory.CreateEntry("EnableSearch", false, "Enable police search for backpack items");
 
         _backpackCategory = MelonPreferences.CreateCategory("Backpack");
         _backpackCategory.SetFilePath(_configFile, false);

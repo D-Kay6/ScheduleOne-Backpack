@@ -2,6 +2,8 @@
 using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.Levelling;
 using Il2CppScheduleOne.PlayerScripts;
+using Il2CppScheduleOne.Product;
+using Il2CppScheduleOne.Product.Packaging;
 using Il2CppScheduleOne.Storage;
 using Il2CppScheduleOne.Tools;
 using Il2CppScheduleOne.UI;
@@ -118,6 +120,30 @@ public class PlayerBackpack : MonoBehaviour
             itemSlot.onItemDataChanged.CombineImpl((Il2CppSystem.Action) _storage.ContentsChanged);
             itemSlot.SetSlotOwner(_storage.Cast<IItemSlotOwner>());
         }
+    }
+
+    public bool ContainsItemsOfInterest(EStealthLevel maxStealthLevel)
+    {
+        for (var i = 0; i < _storage.ItemSlots.Count; i++)
+        {
+            var itemSlot = _storage.ItemSlots[new Index(i)].Cast<ItemSlot>();
+            if (itemSlot?.ItemInstance == null)
+                continue;
+
+            var productInstance = itemSlot.ItemInstance.TryCast<ProductItemInstance>();
+            if (productInstance == null)
+            {
+                if (itemSlot.ItemInstance.Definition.legalStatus != ELegalStatus.Legal)
+                    return true;
+
+                continue;
+            }
+
+            if (productInstance.AppliedPackaging == null || productInstance.AppliedPackaging.StealthLevel <= maxStealthLevel)
+                return true;
+        }
+
+        return false;
     }
 
     private void OnStartClient(bool isOwner)
