@@ -1,6 +1,5 @@
 ﻿using Il2CppScheduleOne.DevUtilities;
 using Il2CppScheduleOne.ItemFramework;
-using Il2CppScheduleOne.Levelling;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Product;
 using Il2CppScheduleOne.Product.Packaging;
@@ -16,11 +15,14 @@ namespace Backpack;
 [RegisterTypeInIl2Cpp]
 public class PlayerBackpack : MonoBehaviour
 {
+
     public const string StorageName = "Backpack";
     public const int MaxStorageSlots = 128;
 
     private bool _backpackEnabled = true;
     private StorageEntity _storage;
+    private Backpack _equippedBackpack = null!;
+
 
     public PlayerBackpack(IntPtr ptr) : base(ptr)
     {
@@ -28,7 +30,9 @@ public class PlayerBackpack : MonoBehaviour
 
     public static PlayerBackpack Instance { get; private set; }
 
-    public bool IsUnlocked => NetworkSingleton<LevelManager>.Instance.GetFullRank() >= Configuration.Instance.UnlockLevel;
+    public bool IsUnlocked = true;
+
+    //public bool IsUnlocked => NetworkSingleton<LevelManager>.Instance.GetFullRank() >= Configuration.Instance.UnlockLevel;
     public bool IsOpen => Singleton<StorageMenu>.Instance.IsOpen && Singleton<StorageMenu>.Instance.TitleLabel.text == StorageName;
 
     private void Awake()
@@ -90,37 +94,50 @@ public class PlayerBackpack : MonoBehaviour
     }
 
     /// <summary>
-    /// Adds the specified number of slots to the backpack.
+    /// Sets the backpack storage to the specified number of slots.
     /// </summary>
     /// <remarks>The maximum number of slots for storage is 128.</remarks>
-    /// <param name="slotCount">The number of slots to add.</param>
-    public void Upgrade(int slotCount)
+    /// <param name="slotCount">The number of slots.</param>
+    public void SetSlots(int slotCount)
     {
         if (slotCount is < 1 or > MaxStorageSlots)
             return;
 
-        var newSlotCount = _storage.SlotCount + slotCount;
-        if (newSlotCount > MaxStorageSlots)
+        if (slotCount > MaxStorageSlots)
         {
-            Logger.Warning("Cannot upgrade backpack to more than {0} slots.", MaxStorageSlots);
+            Logger.Warning("Cannot set backpack slots to more than {0} slots.", MaxStorageSlots);
             return;
         }
 
-        _storage.SlotCount = newSlotCount;
-        _storage.DisplayRowCount = newSlotCount switch
+        var currentCount = _storage.ItemSlots.Count;
+
+        if (slotCount > currentCount)
         {
-            <= 20 => (int) Math.Ceiling(newSlotCount / 5.0),
-            <= 80 => (int) Math.Ceiling(newSlotCount / 10.0),
-            _ => (int) Math.Ceiling(newSlotCount / 16.0)
+            for (int i = currentCount; i < slotCount; i++)
+            {
+                var itemSlot = new ItemSlot();
+                itemSlot.onItemDataChanged?.CombineImpl((Il2CppSystem.Action)_storage.ContentsChanged);
+                itemSlot.SetSlotOwner(_storage.Cast<IItemSlotOwner>());
+                _storage.ItemSlots.Add(itemSlot);
+            }
+        }
+        else if (slotCount < currentCount)
+        {
+            _storage.ItemSlots.RemoveRange(slotCount, currentCount - slotCount);
+        }
+
+        _storage.SlotCount = slotCount;
+
+        _storage.DisplayRowCount = slotCount switch
+        {
+            <= 20 => (int)Math.Ceiling(slotCount / 5.0),
+            <= 80 => (int)Math.Ceiling(slotCount / 10.0),
+            _ => (int)Math.Ceiling(slotCount / 16.0)
         };
 
-        for (var i = _storage.ItemSlots.Count; i < newSlotCount; i++)
-        {
-            var itemSlot = new ItemSlot();
-            itemSlot.onItemDataChanged.CombineImpl((Il2CppSystem.Action) _storage.ContentsChanged);
-            itemSlot.SetSlotOwner(_storage.Cast<IItemSlotOwner>());
-        }
+        _storage.ContentsChanged();
     }
+
 
     public bool ContainsItemsOfInterest(EStealthLevel maxStealthLevel)
     {
@@ -162,6 +179,12 @@ public class PlayerBackpack : MonoBehaviour
         }
 
         Instance = this;
+    }
+    public void OnEquipBackpack(Backpack backpack)
+    {
+        SetBackpackEnabled(true);
+        _equippedBackpack = backpack;
+        SetSlots(backpack.Rows * backpack.Columns);
     }
 
     private void OnDestroy()

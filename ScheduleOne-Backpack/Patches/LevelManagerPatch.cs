@@ -26,5 +26,6 @@ public static class LevelManagerPatch
         var backpackSprite = Sprite.Create(backpackIcon, new Rect(0, 0, backpackIcon.width, backpackIcon.height), new Vector2(0.5f, 0.5f));
         var unlockable = new Unlockable(Configuration.Instance.UnlockLevel, "Backpack", backpackSprite);
         __instance.AddUnlockable(unlockable);
+        BackpackMod.InitBackpacks();
     }
 }

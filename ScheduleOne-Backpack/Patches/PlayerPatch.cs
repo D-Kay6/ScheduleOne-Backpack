@@ -104,6 +104,27 @@ public static class PlayerPatch
         PlayerBackpack.Instance.SetBackpackEnabled(false);
     }
 
+    [HarmonyPatch("PassOutRecovery")]
+    [HarmonyPrefix]
+    public static void PassOutRecovery()
+    {
+        PlayerBackpack.Instance.SetBackpackEnabled(true);
+    }
+
+    [HarmonyPatch("PassOut")]
+    [HarmonyPrefix]
+    public static void PassOut()
+    {
+        PlayerBackpack.Instance.SetBackpackEnabled(false);
+    }
+
+    [HarmonyPatch("OnRevived")]
+    [HarmonyPrefix]
+    public static void OnRevived()
+    {
+        PlayerBackpack.Instance.SetBackpackEnabled(true);
+    }
+
     [HarmonyPatch("OnDied")]
     [HarmonyPrefix]
     public static void OnDied(Player __instance)
