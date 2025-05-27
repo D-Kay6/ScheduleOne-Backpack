@@ -64,8 +64,16 @@ public static class CartPatch
         for (int i = 0; i < __instance.cartEntries.Count; i++)
         {
             var entry = __instance.cartEntries[i];
-            if (BackpackMod.Backpacks.Any(x => x.ShopListing.name == entry.Listing.name))
+            var backpack = BackpackMod.Backpacks.Find(x => x.ShopListing.name == entry.Listing.name);
+            if (backpack != null)
             {
+                var currentBackpack = PlayerBackpack.Instance.GetCurrentBackpack();
+                if (currentBackpack?.Slots > backpack.Slots)
+                {
+                    reason = "You cannot buy a backpack with less slots than your current one.";
+                    __result = false;
+                    break;
+                }
                 totalBackpacks++;
             }
             if (totalBackpacks > 1)
