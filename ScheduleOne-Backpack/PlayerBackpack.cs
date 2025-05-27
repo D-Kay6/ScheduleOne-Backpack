@@ -1,5 +1,7 @@
-﻿using Il2CppScheduleOne.DevUtilities;
+﻿using Harmony;
+using Il2CppScheduleOne.DevUtilities;
 using Il2CppScheduleOne.ItemFramework;
+using Il2CppScheduleOne.Persistence.Datas;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Product;
 using Il2CppScheduleOne.Product.Packaging;
@@ -34,6 +36,8 @@ public class PlayerBackpack : MonoBehaviour
 
     //public bool IsUnlocked => NetworkSingleton<LevelManager>.Instance.GetFullRank() >= Configuration.Instance.UnlockLevel;
     public bool IsOpen => Singleton<StorageMenu>.Instance.IsOpen && Singleton<StorageMenu>.Instance.TitleLabel.text == StorageName;
+
+    public Backpack GetCurrentBackpack() => _equippedBackpack;
 
     private void Awake()
     {
@@ -101,32 +105,35 @@ public class PlayerBackpack : MonoBehaviour
     public void SetSlots(int slotCount)
     {
         if (slotCount is < 1 or > MaxStorageSlots)
-            return;
-
-        if (slotCount > MaxStorageSlots)
         {
-            Logger.Warning("Cannot set backpack slots to more than {0} slots.", MaxStorageSlots);
+            Logger.Warning("Cannot set backpack slots to {0} slots.", slotCount);
             return;
         }
 
-        var currentCount = _storage.ItemSlots.Count;
-
-        if (slotCount > currentCount)
+        // Preserve existing items before resizing
+        var previousItems = new List<ItemInstance>();
+        foreach (var slot in _storage.ItemSlots)
         {
-            for (int i = currentCount; i < slotCount; i++)
+            var itemSlot = slot.TryCast<ItemSlot>();
+            if (itemSlot == null)
             {
-                var itemSlot = new ItemSlot();
-                itemSlot.onItemDataChanged?.CombineImpl((Il2CppSystem.Action)_storage.ContentsChanged);
-                itemSlot.SetSlotOwner(_storage.Cast<IItemSlotOwner>());
-                _storage.ItemSlots.Add(itemSlot);
+                continue;
             }
-        }
-        else if (slotCount < currentCount)
-        {
-            _storage.ItemSlots.RemoveRange(slotCount, currentCount - slotCount);
+
+            if (itemSlot.ItemInstance != null)
+            {
+                previousItems.Add(itemSlot.ItemInstance);
+            }
         }
 
         _storage.SlotCount = slotCount;
+        _storage.DisplayRowCount = 1;
+        _storage.ItemSlots.Clear();
+        for (int i = 0; i < slotCount; i++)
+        {
+            _storage.ItemSlots.Add(new ItemSlot());
+        }
+        Logger.Info("Update backpack storage slots {0}.", slotCount);
 
         _storage.DisplayRowCount = slotCount switch
         {
@@ -135,6 +142,11 @@ public class PlayerBackpack : MonoBehaviour
             _ => (int)Math.Ceiling(slotCount / 16.0)
         };
 
+        // Reinserting items into the new slots
+        for (int i = 0; i < previousItems.Count && i < slotCount; i++)
+        {
+            _storage.ItemSlots[i].Cast<ItemSlot>().ItemInstance = previousItems[i];
+        }
         _storage.ContentsChanged();
     }
 
@@ -182,9 +194,11 @@ public class PlayerBackpack : MonoBehaviour
     }
     public void OnEquipBackpack(Backpack backpack)
     {
-        SetBackpackEnabled(true);
         _equippedBackpack = backpack;
-        SetSlots(backpack.Rows * backpack.Columns);
+        _storage.StorageEntitySubtitle = backpack.Name;
+
+        SetBackpackEnabled(true);
+        SetSlots(backpack.Slots);
     }
 
     private void OnDestroy()

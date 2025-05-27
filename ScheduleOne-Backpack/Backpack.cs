@@ -24,8 +24,7 @@ public class Backpack
     public string Name { get; set; } = "Default Backpack";
     public string Description { get; set; } = "This is a default backpack.";
 
-    public int Rows { get; set; } = 2;
-    public int Columns { get; set; } = 2;
+    public int Slots { get; set; } = 3;
 
     public Sprite Icon;
 
@@ -40,12 +39,11 @@ public class Backpack
 
     public Backpack() { }
 
-    public Backpack(string name, string description, int rows, int columns, int price, FullRank fullRank, string iconPath)
+    public Backpack(string name, string description, int slots, int price, FullRank fullRank, string iconPath)
     {
         Name = name;
         Description = description;
-        Rows = rows;
-        Columns = columns;
+        Slots = slots;
         Price = price;
         FullRank = fullRank;
 
