@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using Il2CppScheduleOne.DevUtilities;
 using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.UI.Shop;
@@ -19,8 +18,9 @@ public static class CartPatch
         if (warning.StartsWith("Vehicle") || !__result)
             return;
 
-        var backpack = Player.Local.GetBackpackStorage();
-        if (!__instance.Shop.WillCartFit(backpack.ItemSlots))
+        var items = PlayerBackpack.Instance.ItemSlots;
+        items.InsertRange(0, PlayerInventory.Instance.hotbarSlots.Cast<Il2CppSystem.Collections.Generic.IEnumerable<ItemSlot>>());
+        if (!__instance.Shop.WillCartFit(items))
             return;
 
         warning = "Inventory won't fit everything. Some items will be placed in your backpack.";

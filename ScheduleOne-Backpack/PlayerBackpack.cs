@@ -8,6 +8,7 @@ using Il2CppScheduleOne.Storage;
 using Il2CppScheduleOne.Tools;
 using Il2CppScheduleOne.UI;
 using Il2CppScheduleOne.UI.Phone;
+using Il2CppSystem.Linq;
 using MelonLoader;
 using UnityEngine;
 
@@ -30,6 +31,7 @@ public class PlayerBackpack : MonoBehaviour
 
     public bool IsUnlocked => NetworkSingleton<LevelManager>.Instance.GetFullRank() >= Configuration.Instance.UnlockLevel;
     public bool IsOpen => Singleton<StorageMenu>.Instance.IsOpen && Singleton<StorageMenu>.Instance.TitleLabel.text == StorageName;
+    public Il2CppSystem.Collections.Generic.List<ItemSlot> ItemSlots => _storage.ItemSlots.Cast<Il2CppSystem.Collections.Generic.IEnumerable<ItemSlot>>().ToList();
 
     private void Awake()
     {

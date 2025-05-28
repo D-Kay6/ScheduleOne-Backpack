@@ -21,10 +21,10 @@ public static class ShopInterfacePatch
             return;
 
         var insertIndex = PlayerSingleton<PlayerInventory>.instance.hotbarSlots.Count;
-        var backpack = Player.Local.GetBackpackStorage();
-        for (var i = 0; i < backpack.ItemSlots.Count; i++)
+        var items = PlayerBackpack.Instance.ItemSlots;
+        for (var i = 0; i < items.Count; i++)
         {
-            var itemSlot = backpack.ItemSlots[new Index(i)].Cast<ItemSlot>();
+            var itemSlot = items[new Index(i)].Cast<ItemSlot>();
             if (itemSlot == null)
                 continue;
 
