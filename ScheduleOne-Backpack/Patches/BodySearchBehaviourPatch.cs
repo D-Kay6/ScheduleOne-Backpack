@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Backpack.Config;
 using HarmonyLib;
 using Il2CppScheduleOne.NPCs.Behaviour;
 using Il2CppScheduleOne.UI;

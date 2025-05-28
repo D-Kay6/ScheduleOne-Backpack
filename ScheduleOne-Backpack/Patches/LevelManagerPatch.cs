@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Backpack.Config;
+using HarmonyLib;
 using Il2CppScheduleOne.Levelling;
 using UnityEngine;
 

@@ -23,7 +23,8 @@
 
     <ItemGroup>
         <Compile Include="BackpackMod.cs"/>
-        <Compile Include="Configuration.cs" />
+        <Compile Include="Config\ConfigSyncManager.cs" />
+        <Compile Include="Config\Configuration.cs" />
         <Compile Include="Patches\BodySearchBehaviourPatch.cs" />
         <Compile Include="Patches\CartPatch.cs" />
         <Compile Include="Patches\LevelManagerPatch.cs" />
@@ -41,6 +42,10 @@
     <ItemGroup>
       <Reference Include="Assembly-CSharp">
         <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+      <Reference Include="Il2Cppcom.rlabrecque.steamworks.net">
+        <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\Il2Cppcom.rlabrecque.steamworks.net.dll</HintPath>
         <Private>False</Private>
       </Reference>
       <Reference Include="Il2CppFishNet.Runtime">
@@ -80,6 +85,10 @@
       </Reference>
       <Reference Include="UnityEngine.ImageConversionModule">
         <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\UnityEngine.ImageConversionModule.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+      <Reference Include="UnityEngine.JSONSerializeModule">
+        <HintPath>D:\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\UnityEngine.JSONSerializeModule.dll</HintPath>
         <Private>False</Private>
       </Reference>
       <Reference Include="UnityEngine.UI">

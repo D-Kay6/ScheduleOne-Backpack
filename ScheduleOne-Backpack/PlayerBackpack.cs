@@ -1,4 +1,5 @@
-﻿using Il2CppScheduleOne.DevUtilities;
+﻿using Backpack.Config;
+using Il2CppScheduleOne.DevUtilities;
 using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.Levelling;
 using Il2CppScheduleOne.PlayerScripts;
@@ -42,6 +43,8 @@ public class PlayerBackpack : MonoBehaviour
             return;
         }
 
+        Logger.Info("Configuring backpack storage...");
+        UpdateSize(Configuration.Instance.StorageSlots);
         OnStartClient(true);
     }
 
@@ -91,39 +94,6 @@ public class PlayerBackpack : MonoBehaviour
         _storage.SendAccessor(null);
     }
 
-    /// <summary>
-    /// Adds the specified number of slots to the backpack.
-    /// </summary>
-    /// <remarks>The maximum number of slots for storage is 128.</remarks>
-    /// <param name="slotCount">The number of slots to add.</param>
-    public void Upgrade(int slotCount)
-    {
-        if (slotCount is < 1 or > MaxStorageSlots)
-            return;
-
-        var newSlotCount = _storage.SlotCount + slotCount;
-        if (newSlotCount > MaxStorageSlots)
-        {
-            Logger.Warning("Cannot upgrade backpack to more than {0} slots.", MaxStorageSlots);
-            return;
-        }
-
-        _storage.SlotCount = newSlotCount;
-        _storage.DisplayRowCount = newSlotCount switch
-        {
-            <= 20 => (int) Math.Ceiling(newSlotCount / 5.0),
-            <= 80 => (int) Math.Ceiling(newSlotCount / 10.0),
-            _ => (int) Math.Ceiling(newSlotCount / 16.0)
-        };
-
-        for (var i = _storage.ItemSlots.Count; i < newSlotCount; i++)
-        {
-            var itemSlot = new ItemSlot();
-            itemSlot.onItemDataChanged.CombineImpl((Il2CppSystem.Action) _storage.ContentsChanged);
-            itemSlot.SetSlotOwner(_storage.Cast<IItemSlotOwner>());
-        }
-    }
-
     public bool ContainsItemsOfInterest(EStealthLevel maxStealthLevel)
     {
         for (var i = 0; i < _storage.ItemSlots.Count; i++)
@@ -146,6 +116,101 @@ public class PlayerBackpack : MonoBehaviour
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Adds the specified number of slots to the backpack.
+    /// </summary>
+    /// <remarks>The maximum number of slots for storage is 128.</remarks>
+    /// <param name="slotCount">The number of slots to add.</param>
+    public void Upgrade(int slotCount)
+    {
+        if (slotCount is < 1 or > MaxStorageSlots)
+            return;
+
+        var newSlotCount = _storage.SlotCount + slotCount;
+        if (newSlotCount > MaxStorageSlots)
+        {
+            Logger.Warning("Cannot upgrade backpack to more than {0} slots.", MaxStorageSlots);
+            return;
+        }
+
+        UpdateSize(newSlotCount);
+    }
+
+    /// <summary>
+    /// Removes the specified number of slots from the backpack.
+    /// </summary>
+    /// <param name="slotCount">The number of slots to remove.</param>
+    /// <param name="force">If true, will remove slots even if they contain items.</param>
+    public void Downgrade(int slotCount, bool force = false)
+    {
+        if (slotCount < 1)
+            return;
+
+        if (!force && slotCount >= _storage.SlotCount)
+        {
+            Logger.Warning("Cannot downgrade backpack to zero slots. A minimum of one must remain.");
+            return;
+        }
+
+        var newSlotCount = _storage.SlotCount - slotCount;
+        if (newSlotCount < 1)
+            newSlotCount = 1;
+
+        if (force)
+        {
+            UpdateSize(newSlotCount);
+            return;
+        }
+
+        var isSafeToRemove = true;
+        var removedSlots = _storage.ItemSlots.GetRange(newSlotCount, _storage.SlotCount - newSlotCount);
+        for (var i = 0; i < removedSlots.Count; i++)
+        {
+            var itemSlot = removedSlots[new Index(i)].Cast<ItemSlot>();
+            if (itemSlot?.ItemInstance == null)
+                continue;
+
+            Logger.Warning("Downgrading backpack will remove item: " + itemSlot.ItemInstance.Definition.name);
+            isSafeToRemove = false;
+        }
+
+        if (!isSafeToRemove)
+        {
+            Logger.Warning("Cannot downgrade backpack due to items present in removed slots.");
+            return;
+        }
+
+        UpdateSize(newSlotCount);
+    }
+
+    private void UpdateSize(int newSize)
+    {
+        _storage.SlotCount = newSize;
+        _storage.DisplayRowCount = newSize switch
+        {
+            <= 20 => (int) Math.Ceiling(newSize / 5.0),
+            <= 80 => (int) Math.Ceiling(newSize / 10.0),
+            _ => (int) Math.Ceiling(newSize / 16.0)
+        };
+
+        if (_storage.ItemSlots.Count > newSize)
+        {
+            _storage.ItemSlots.RemoveRange(newSize, _storage.ItemSlots.Count - newSize);
+            return;
+        }
+
+        for (var i = _storage.ItemSlots.Count; i < newSize; i++)
+        {
+            var itemSlot = new ItemSlot();
+            if (itemSlot.onItemDataChanged == null)
+                itemSlot.onItemDataChanged = (Il2CppSystem.Action) _storage.ContentsChanged;
+            else
+                itemSlot.onItemDataChanged.CombineImpl((Il2CppSystem.Action) _storage.ContentsChanged);
+
+            itemSlot.SetSlotOwner(_storage.Cast<IItemSlotOwner>());
+        }
     }
 
     private void OnStartClient(bool isOwner)

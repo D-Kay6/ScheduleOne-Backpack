@@ -2,7 +2,7 @@
 using MelonLoader;
 using UnityEngine;
 
-namespace Backpack;
+namespace Backpack.Config;
 
 public class Configuration
 {
@@ -32,30 +32,31 @@ public class Configuration
         _storageSlotsEntry = _backpackCategory.CreateEntry("StorageSlots", 12, "Number of total storage slots");
     }
 
-    public KeyCode ToggleKey
-    {
-        get => _toggleKeyEntry.Value;
-        set => _toggleKeyEntry.Value = value;
-    }
-
-    public bool EnableSearch
-    {
-        get => _enableSearchEntry.Value;
-        set => _enableSearchEntry.Value = value;
-    }
-
-    public FullRank UnlockLevel => new(_unlockLevelEntry.Value.Rank, Math.Clamp(_unlockLevelEntry.Value.Tier, 1, 5));
-    public int StorageSlots => Math.Clamp(_storageSlotsEntry.Value, 1, PlayerBackpack.MaxStorageSlots);
+    public KeyCode ToggleKey { get; set; }
+    public bool EnableSearch { get; set; }
+    public FullRank UnlockLevel { get; internal set; }
+    public int StorageSlots { get; internal set; }
 
     public void Load()
     {
-        _generalCategory.LoadFromFile();
-        _backpackCategory.LoadFromFile();
+        MelonPreferences.Load();
+        Reset();
+    }
+
+    public void Reset()
+    {
+        ToggleKey = _toggleKeyEntry.Value;
+        EnableSearch = _enableSearchEntry.Value;
+        UnlockLevel = new FullRank(_unlockLevelEntry.Value.Rank, Math.Clamp(_unlockLevelEntry.Value.Tier, 1, 5));
+        StorageSlots = Math.Clamp(_storageSlotsEntry.Value, 1, PlayerBackpack.MaxStorageSlots);
     }
 
     public void Save()
     {
-        _generalCategory.SaveToFile();
-        _backpackCategory.SaveToFile();
+        _toggleKeyEntry.Value = ToggleKey;
+        _enableSearchEntry.Value = EnableSearch;
+        _unlockLevelEntry.Value = new FullRank(UnlockLevel.Rank, Math.Clamp(UnlockLevel.Tier, 1, 5));
+        _storageSlotsEntry.Value = Math.Clamp(StorageSlots, 1, PlayerBackpack.MaxStorageSlots);
+        MelonPreferences.Save();
     }
 }

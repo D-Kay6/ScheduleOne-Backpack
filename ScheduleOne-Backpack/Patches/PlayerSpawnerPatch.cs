@@ -27,17 +27,12 @@ public static class PlayerSpawnerPatch
             return;
         }
 
+        Logger.Info("Adding backpack storage to player prefab...");
         var storage = player.gameObject.GetOrAddComponent<StorageEntity>();
-        storage.SlotCount = Configuration.Instance.StorageSlots;
-        storage.DisplayRowCount = storage.SlotCount switch
-        {
-            <= 20 => (int) Math.Ceiling(storage.SlotCount / 5.0),
-            <= 80 => (int) Math.Ceiling(storage.SlotCount / 10.0),
-            _ => (int) Math.Ceiling(storage.SlotCount / 16.0)
-        };
+        storage.SlotCount = PlayerBackpack.MaxStorageSlots;
+        storage.DisplayRowCount = 8;
         storage.StorageEntityName = PlayerBackpack.StorageName;
         storage.MaxAccessDistance = float.PositiveInfinity;
-
         player.LocalGameObject.GetOrAddComponent<PlayerBackpack>();
     }
 }
