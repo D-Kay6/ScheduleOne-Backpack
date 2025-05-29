@@ -1,7 +1,12 @@
 ﻿using Backpack.Config;
 using HarmonyLib;
-using Il2CppScheduleOne.Levelling;
 using UnityEngine;
+
+#if IL2CPP
+using Il2CppScheduleOne.Levelling;
+#elif MONO
+using ScheduleOne.Levelling;
+#endif
 
 namespace Backpack.Patches;
 

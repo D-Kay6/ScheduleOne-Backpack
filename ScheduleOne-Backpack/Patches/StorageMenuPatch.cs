@@ -1,7 +1,13 @@
 ﻿using HarmonyLib;
+using UnityEngine;
+
+#if IL2CPP
 using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.UI;
-using UnityEngine;
+#elif MONO
+using ScheduleOne.ItemFramework;
+using ScheduleOne.UI;
+#endif
 
 namespace Backpack.Patches;
 
@@ -16,7 +22,12 @@ public static class StorageMenuPatch
             return;
 
         var container = __instance.SlotContainer;
-        var prefab = __instance.SlotsUIs[0].gameObject;
+        var prefab = __instance.SlotsUIs[0]?.gameObject;
+        if (prefab == null)
+        {
+            MelonLoader.MelonLogger.Error("StorageMenu prefab is null. Cannot create additional slots.");
+            return;
+        }
 
         var slots = new ItemSlotUI[PlayerBackpack.MaxStorageSlots];
         for (var i = 0; i < PlayerBackpack.MaxStorageSlots; i++)

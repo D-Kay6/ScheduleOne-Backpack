@@ -1,7 +1,13 @@
 ﻿using HarmonyLib;
+
+#if IL2CPP
 using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.UI.Shop;
+#elif MONO
+using ScheduleOne.PlayerScripts;
+using ScheduleOne.UI.Shop;
+#endif
 
 namespace Backpack.Patches;
 
@@ -19,7 +25,11 @@ public static class CartPatch
             return;
 
         var items = PlayerBackpack.Instance.ItemSlots;
+#if IL2CPP
         items.InsertRange(0, PlayerInventory.Instance.hotbarSlots.Cast<Il2CppSystem.Collections.Generic.IEnumerable<ItemSlot>>());
+#elif MONO
+        items.InsertRange(0, PlayerInventory.Instance.hotbarSlots);
+#endif
         if (!__instance.Shop.WillCartFit(items))
             return;
 

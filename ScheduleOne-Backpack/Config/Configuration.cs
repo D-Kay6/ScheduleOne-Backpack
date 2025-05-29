@@ -1,6 +1,11 @@
-﻿using Il2CppScheduleOne.Levelling;
-using MelonLoader;
+﻿using MelonLoader;
 using UnityEngine;
+
+#if IL2CPP
+using Il2CppScheduleOne.Levelling;
+#elif MONO
+using ScheduleOne.Levelling;
+#endif
 
 namespace Backpack.Config;
 

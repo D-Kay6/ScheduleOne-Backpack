@@ -1,10 +1,17 @@
 ﻿using System.Collections;
 using System.Text;
+using MelonLoader;
+using UnityEngine;
+
+#if IL2CPP
 using Il2CppScheduleOne.Levelling;
 using Il2CppScheduleOne.Networking;
 using Il2CppSteamworks;
-using MelonLoader;
-using UnityEngine;
+#elif MONO
+using ScheduleOne.Levelling;
+using ScheduleOne.Networking;
+using Steamworks;
+#endif
 
 namespace Backpack.Config;
 
