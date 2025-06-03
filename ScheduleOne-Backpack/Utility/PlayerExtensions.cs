@@ -1,5 +1,10 @@
-﻿using Il2CppScheduleOne.PlayerScripts;
+﻿#if IL2CPP
+using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Storage;
+#elif MONO
+using ScheduleOne.PlayerScripts;
+using ScheduleOne.Storage;
+#endif
 
 namespace Backpack;
 

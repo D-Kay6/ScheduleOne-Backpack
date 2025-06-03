@@ -2,9 +2,10 @@ using System.Reflection;
 using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.Levelling;
 using Il2CppScheduleOne;
+using Backpack.Config;
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(Backpack.BackpackMod), "OG Backpack", "1.7.0", "D-Kay", "https://www.nexusmods.com/schedule1/mods/818")]
+[assembly: MelonInfo(typeof(Backpack.BackpackMod), "OG Backpack", "1.8.0", "D-Kay", "https://www.nexusmods.com/schedule1/mods/818")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 [assembly: AssemblyMetadata("NexusModID", "818")]
 
@@ -36,7 +37,6 @@ public class BackpackMod : MelonMod
 
     public static void InitBackpacks()
     {
-
         foreach (var backpack in Backpacks)
         {
             backpack.ItemDefinition = new StorableItemDefinition
@@ -66,5 +66,14 @@ public class BackpackMod : MelonMod
         }
 
         ShopManager = new ShopManager();
+    }
+
+    public override void OnSceneWasLoaded(int buildIndex, string sceneName)
+    {
+        Configuration.Instance.Reset();
+        if (sceneName != "Main")
+            return;
+
+        ConfigSyncManager.StartSync();
     }
 }

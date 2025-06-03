@@ -33,6 +33,7 @@ Want to help improve the mod? Feel free to reach out on Discord or contribute vi
 
 ## Previous Versions
 
+- **Version 1.8.0** – Added config sync from host to clients; fixed incorrect scaling of backpack UI; fixed incorrect cart overflow warning.
 - **Version 1.7.0** – Added support for more than 20 slots in backpack; added support for using the backpack first when buying more items than your intentory can hold; added configurable backpack search to police behaviour.
 - **Version 1.6.0** – Made multiple settings configurable; added a level requirement for using the backpack.
 - **Version 1.5.1** – Fixed the crashes caused by using custom code in networking.

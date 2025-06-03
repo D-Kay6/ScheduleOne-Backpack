@@ -1,7 +1,14 @@
 ﻿using HarmonyLib;
+
+#if IL2CPP
 using Il2CppScheduleOne.Persistence;
 using Il2CppScheduleOne.Persistence.Datas;
 using Il2CppScheduleOne.PlayerScripts;
+#elif MONO
+using ScheduleOne.Persistence;
+using ScheduleOne.Persistence.Datas;
+using ScheduleOne.PlayerScripts;
+#endif
 
 namespace Backpack.Patches;
 
@@ -30,7 +37,13 @@ public static class PlayerPatch
         {
             contents += $"|||{currentBackpack.Name}";
         }
+
+#if IL2CPP
         __instance.Cast<ISaveable>().WriteSubfile(parentFolderPath, "Backpack", contents);
+#elif MONO
+        ISaveable instance = __instance;
+        instance.WriteSubfile(parentFolderPath, "Backpack", contents);
+#endif
     }
 
     [HarmonyPatch("Load", typeof(PlayerData), typeof(string))]

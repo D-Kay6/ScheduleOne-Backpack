@@ -1,7 +1,13 @@
 ﻿using HarmonyLib;
+using UnityEngine;
+
+#if IL2CPP
 using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.UI;
-using UnityEngine;
+#elif MONO
+using ScheduleOne.ItemFramework;
+using ScheduleOne.UI;
+#endif
 
 namespace Backpack.Patches;
 
@@ -12,14 +18,19 @@ public static class StorageMenuPatch
     [HarmonyPrefix]
     public static void Awake(StorageMenu __instance)
     {
-        if (__instance.SlotsUIs.Length >= Configuration.Instance.StorageSlots)
+        if (__instance.SlotsUIs.Length >= PlayerBackpack.MaxStorageSlots)
             return;
 
         var container = __instance.SlotContainer;
-        var prefab = __instance.SlotsUIs[0].gameObject;
+        var prefab = __instance.SlotsUIs[0]?.gameObject;
+        if (prefab == null)
+        {
+            MelonLoader.MelonLogger.Error("StorageMenu prefab is null. Cannot create additional slots.");
+            return;
+        }
 
-        var slots = new ItemSlotUI[Configuration.Instance.StorageSlots];
-        for (var i = 0; i < Configuration.Instance.StorageSlots; i++)
+        var slots = new ItemSlotUI[PlayerBackpack.MaxStorageSlots];
+        for (var i = 0; i < PlayerBackpack.MaxStorageSlots; i++)
         {
             if (i < __instance.SlotsUIs.Length)
             {
@@ -40,18 +51,18 @@ public static class StorageMenuPatch
     [HarmonyPostfix]
     public static void Open(StorageMenu __instance, string title, string subtitle, IItemSlotOwner owner)
     {
-        __instance.CloseButton.anchoredPosition = new Vector2(0f, __instance.SlotGridLayout.constraintCount * -(__instance.SlotGridLayout.cellSize.y + __instance.SlotGridLayout.spacing.y) - __instance.CloseButton.sizeDelta.y);
+        var spacing = __instance.SlotGridLayout.cellSize.y + __instance.SlotGridLayout.spacing.y;
+        __instance.CloseButton.anchoredPosition = new Vector2(0f, __instance.SlotGridLayout.constraintCount * -spacing - __instance.CloseButton.sizeDelta.y);
         if (__instance.SlotGridLayout.constraintCount <= 4)
             return;
 
-        var pos = __instance.transform.position;
-        __instance.Container.position = new Vector3(pos.x, pos.y - __instance.SlotGridLayout.constraintCount * -(__instance.SlotGridLayout.cellSize.y - __instance.SlotGridLayout.spacing.y) - __instance.CloseButton.sizeDelta.y, pos.z);
+        __instance.Container.localPosition = new Vector3(0f, (__instance.SlotGridLayout.constraintCount - 4) * spacing, 0f);
     }
 
     [HarmonyPatch("CloseMenu")]
     [HarmonyPrefix]
     public static void CloseMenu(StorageMenu __instance)
     {
-        __instance.Container.position = __instance.transform.position;
+        __instance.Container.localPosition = Vector3.zero;
     }
 }
