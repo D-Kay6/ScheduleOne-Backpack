@@ -25,6 +25,11 @@ public static class PlayerPatch
     {
         var backpackStorage = __instance.GetBackpackStorage();
         var contents = new ItemSet(backpackStorage.ItemSlots).GetJSON();
+        var currentBackpack = __instance.GetCurrentBackpack();
+        if (currentBackpack != null)
+        {
+            contents += $"|||{currentBackpack.Name}";
+        }
         __instance.Cast<ISaveable>().WriteSubfile(parentFolderPath, "Backpack", contents);
     }
 
@@ -38,8 +43,23 @@ public static class PlayerPatch
         Logger.Info("Loading local backpack data.");
         try
         {
+            var backpackSplitData = backpackData.Split("|||");
+            var backpackName = backpackSplitData.LastOrDefault();
+            if (!string.IsNullOrEmpty(backpackName))
+            {
+                var backpack = BackpackMod.Backpacks.FirstOrDefault(b => b.Name == backpackName);
+                if (backpack != null)
+                {
+                    __instance.TryGetComponent<PlayerBackpack>(out var backpackComponent);
+                    if (backpackComponent != null)
+                    {
+                        backpackComponent.OnEquipBackpack(backpack);
+                        Logger.Info($"Equipped backpack: {backpack.Name}");
+                    }
+                }
+            }
             var backpackStorage = __instance.GetBackpackStorage();
-            var itemSet = ItemSet.Deserialize(backpackData);
+            var itemSet = ItemSet.Deserialize(backpackSplitData.FirstOrDefault());
             backpackStorage.LoadFromItemSet(itemSet);
         }
         catch (Exception e)

@@ -14,9 +14,9 @@ public class BackpackMod : MelonMod
 {
     public readonly static List<Backpack> Backpacks =
     [
-        new Backpack("Small Backpack", "A small backpack for minimal items.", 3, 300, new FullRank(ERank.Hoodlum, 1), "small.png"),
-        new Backpack("Medium Backpack", "A very standard backpack for various items.", 6, 700, new FullRank(ERank.Hustler, 1), "medium.png"),
-        new Backpack("Large Backpack", "A large backpack for big guns and items.", 64, 1500, new FullRank(ERank.Baron, 1), "big.png"),
+        new Backpack("Small Backpack", "A small backpack for minimal items.", 4, 2000, new FullRank(ERank.Hoodlum, 1), "small.png"),
+        new Backpack("Medium Backpack", "A very standard backpack for various items.", 8, 4000, new FullRank(ERank.Hustler, 2), "medium.png"),
+        new Backpack("Large Backpack", "A large backpack for big guns and items.", 20, 8000, new FullRank(ERank.Enforcer, 1), "big.png"),
     ];
 
     private static ShopManager _shopManager;
