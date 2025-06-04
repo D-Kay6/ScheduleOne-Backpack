@@ -68,7 +68,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="Assets\Icon.png"/>
+        <EmbeddedResource Include="Assets\big.png" />
+        <EmbeddedResource Include="Assets\Icon.png" />
+        <EmbeddedResource Include="Assets\medium.png" />
+        <EmbeddedResource Include="Assets\small.png" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(Configuration)' == 'IL2CPP'">
