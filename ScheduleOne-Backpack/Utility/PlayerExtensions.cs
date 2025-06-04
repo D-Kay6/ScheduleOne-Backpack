@@ -21,14 +21,4 @@ public static class PlayerExtensions
 
         return backpackStorage;
     }
-
-    public static Backpack GetCurrentBackpack(this Player player)
-    {
-        if (player == null)
-            throw new ArgumentNullException(nameof(player));
-        var backpack = player.LocalGameObject.GetComponent<PlayerBackpack>();
-        if (backpack == null)
-            throw new InvalidOperationException("Player does not have a PlayerBackpack component.");
-        return backpack.GetCurrentBackpack();
-    }
 }

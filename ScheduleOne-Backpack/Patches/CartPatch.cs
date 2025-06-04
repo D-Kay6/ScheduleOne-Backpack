@@ -38,7 +38,7 @@ public static class CartPatch
         for (int i = 0; i < _purchasedBackpacks.Count; i++)
         {
             var backpack = BackpackMod.Backpacks.FirstOrDefault(x => x.ShopListing.name == _purchasedBackpacks[i].name);
-            PlayerBackpack.Instance.OnEquipBackpack(backpack);
+            PlayerBackpack.Instance.EquipBackpackByName(backpack.Name);
             PlayerInventory.Instance.RemoveAmountOfItem(backpack.ItemDefinition.ID);
         }
     }

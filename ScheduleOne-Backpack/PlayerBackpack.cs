@@ -1,12 +1,12 @@
-﻿using Harmony;
-﻿using Backpack.Config;
+using Harmony;
+using Backpack.Config;
 using UnityEngine;
 
 #if IL2CPP
 using MelonLoader;
 using Il2CppScheduleOne.DevUtilities;
 using Il2CppScheduleOne.ItemFramework;
-using Il2CppScheduleOne.Persistence.Datas;
+using Il2CppScheduleOne.Levelling;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Product;
 using Il2CppScheduleOne.Product.Packaging;
@@ -57,9 +57,8 @@ public class PlayerBackpack : MonoBehaviour
 
     public static PlayerBackpack Instance { get; private set; }
 
-    public bool IsUnlocked = true;
+    public bool IsUnlocked => NetworkSingleton<LevelManager>.Instance.GetFullRank() >= Configuration.Instance.UnlockLevel;
 
-    //public bool IsUnlocked => NetworkSingleton<LevelManager>.Instance.GetFullRank() >= Configuration.Instance.UnlockLevel;
     public bool IsOpen => Singleton<StorageMenu>.Instance.IsOpen && Singleton<StorageMenu>.Instance.TitleLabel.text == StorageName;
 #if IL2CPP
     public Il2CppSystem.Collections.Generic.List<ItemSlot> ItemSlots => _storage.ItemSlots.Cast<Il2CppSystem.Collections.Generic.IEnumerable<ItemSlot>>().ToList();
@@ -78,8 +77,6 @@ public class PlayerBackpack : MonoBehaviour
             return;
         }
 
-        Logger.Info("Configuring backpack storage...");
-        UpdateSize(Configuration.Instance.StorageSlots);
         OnStartClient(true);
     }
 
@@ -180,60 +177,22 @@ public class PlayerBackpack : MonoBehaviour
     }
 
     /// <summary>
-    /// Sets the backpack storage to the specified number of slots.
+    /// Adds the specified number of slots to the backpack.
     /// </summary>
     /// <remarks>The maximum number of slots for storage is 128.</remarks>
-    /// <param name="slotCount">The number of slots.</param>
-    public void SetSlots(int slotCount)
+    /// <param name="slotCount">The number of slots to add.</param>
+    public void Upgrade(int slotCount)
     {
         if (slotCount is < 1 or > MaxStorageSlots)
+            return;
+
+        var newSlotCount = _storage.SlotCount + slotCount;
+        if (newSlotCount > MaxStorageSlots)
         {
-            Logger.Warning("Cannot set backpack slots to {0} slots.", slotCount);
+            Logger.Warning("Cannot upgrade backpack to more than {0} slots.", MaxStorageSlots);
             return;
         }
 
-        // Preserve existing items before resizing
-        var previousItems = new List<ItemInstance>();
-        foreach (var slot in _storage.ItemSlots)
-        {
-            var itemSlot = slot.TryCast<ItemSlot>();
-            if (itemSlot == null)
-            {
-                continue;
-            }
-
-            if (itemSlot.ItemInstance != null)
-            {
-                previousItems.Add(itemSlot.ItemInstance);
-            }
-        }
-
-        _storage.SlotCount = slotCount;
-        _storage.DisplayRowCount = 1;
-        _storage.ItemSlots.Clear();
-        for (int i = 0; i < slotCount; i++)
-        {
-            _storage.ItemSlots.Add(new ItemSlot());
-        }
-        Logger.Info("Update backpack storage slots {0}.", slotCount);
-
-        _storage.DisplayRowCount = slotCount switch
-        {
-            <= 20 => (int)Math.Ceiling(slotCount / 5.0),
-            <= 80 => (int)Math.Ceiling(slotCount / 10.0),
-            _ => (int)Math.Ceiling(slotCount / 16.0)
-        };
-
-        // Reinserting items into the new slots
-        for (int i = 0; i < previousItems.Count && i < slotCount; i++)
-        {
-            _storage.ItemSlots[i].Cast<ItemSlot>().ItemInstance = previousItems[i];
-        }
-        _storage.ContentsChanged();
-    }
-
-
-    public bool ContainsItemsOfInterest(EStealthLevel maxStealthLevel)
         UpdateSize(newSlotCount);
     }
 
@@ -293,9 +252,9 @@ public class PlayerBackpack : MonoBehaviour
         _storage.SlotCount = newSize;
         _storage.DisplayRowCount = newSize switch
         {
-            <= 20 => (int) Math.Ceiling(newSize / 5.0),
-            <= 80 => (int) Math.Ceiling(newSize / 10.0),
-            _ => (int) Math.Ceiling(newSize / 16.0)
+            <= 20 => (int)Math.Ceiling(newSize / 5.0),
+            <= 80 => (int)Math.Ceiling(newSize / 10.0),
+            _ => (int)Math.Ceiling(newSize / 16.0)
         };
 
         if (_storage.ItemSlots.Count > newSize)
@@ -309,9 +268,9 @@ public class PlayerBackpack : MonoBehaviour
             var itemSlot = new ItemSlot();
 #if IL2CPP
             if (itemSlot.onItemDataChanged == null)
-                itemSlot.onItemDataChanged = (Il2CppSystem.Action) _storage.ContentsChanged;
+                itemSlot.onItemDataChanged = (Il2CppSystem.Action)_storage.ContentsChanged;
             else
-                itemSlot.onItemDataChanged.CombineImpl((Il2CppSystem.Action) _storage.ContentsChanged);
+                itemSlot.onItemDataChanged.CombineImpl((Il2CppSystem.Action)_storage.ContentsChanged);
 
             itemSlot.SetSlotOwner(_storage.Cast<IItemSlotOwner>());
 #elif MONO
@@ -339,13 +298,27 @@ public class PlayerBackpack : MonoBehaviour
 
         Instance = this;
     }
-    public void OnEquipBackpack(Backpack backpack)
+    public void EquipBackpackByName(string backpackName)
     {
+        var backpack = BackpackMod.Backpacks.FirstOrDefault(x => x.ShopListing.name == backpackName);
+        if (backpack == null)
+        {
+            Logger.Error("Backpack with name {0} not found.", backpackName);
+            return;
+        }
         _equippedBackpack = backpack;
         _storage.StorageEntitySubtitle = backpack.Name;
 
         SetBackpackEnabled(true);
-        SetSlots(backpack.Slots);
+        var diff = backpack.Slots - _storage.SlotCount;
+        if (diff > 0)
+        {
+            Upgrade(diff);
+        }
+        else if (diff < 0)
+        {
+            Downgrade(-diff, true);
+        }
     }
 
     private void OnDestroy()
