@@ -57,8 +57,6 @@ public class PlayerBackpack : MonoBehaviour
 
     public static PlayerBackpack Instance { get; private set; }
 
-    public bool IsUnlocked => NetworkSingleton<LevelManager>.Instance.GetFullRank() >= Configuration.Instance.UnlockLevel;
-
     public bool IsOpen => Singleton<StorageMenu>.Instance.IsOpen && Singleton<StorageMenu>.Instance.TitleLabel.text == StorageName;
 #if IL2CPP
     public Il2CppSystem.Collections.Generic.List<ItemSlot> ItemSlots => _storage.ItemSlots.Cast<Il2CppSystem.Collections.Generic.IEnumerable<ItemSlot>>().ToList();
@@ -66,7 +64,9 @@ public class PlayerBackpack : MonoBehaviour
     public List<ItemSlot> ItemSlots => _storage.ItemSlots.ToList();
 #endif
 
-    public Backpack GetCurrentBackpack() => _equippedBackpack;
+    public bool IsBackpackEquipped => _equippedBackpack != null;
+    public string GetCurrentBackpackName() => _equippedBackpack?.Name;
+    public int GetCurrentBackpackSlots() => _equippedBackpack.Slots;
 
     private void Awake()
     {
@@ -82,7 +82,7 @@ public class PlayerBackpack : MonoBehaviour
 
     private void Update()
     {
-        if (!_backpackEnabled || !IsUnlocked || !Input.GetKeyDown(Configuration.Instance.ToggleKey))
+        if (!_backpackEnabled || !Input.GetKeyDown(Configuration.Instance.ToggleKey))
             return;
 
         try
@@ -108,7 +108,7 @@ public class PlayerBackpack : MonoBehaviour
 
     public void Open()
     {
-        if (!_backpackEnabled || !IsUnlocked || Singleton<ManagementClipboard>.Instance.IsEquipped || Singleton<StorageMenu>.Instance.IsOpen || Phone.Instance.IsOpen)
+        if (!_backpackEnabled || _equippedBackpack == null || Singleton<ManagementClipboard>.Instance.IsEquipped || Singleton<StorageMenu>.Instance.IsOpen || Phone.Instance.IsOpen)
             return;
 
         var storageMenu = Singleton<StorageMenu>.Instance;

@@ -47,9 +47,6 @@ public static class CartPatch
     [HarmonyPostfix]
     public static void GetWarning(Cart __instance, ref bool __result, ref string warning)
     {
-        if (!PlayerBackpack.Instance.IsUnlocked)
-            return;
-
         if (warning.StartsWith("Vehicle") || !__result)
             return;
 
@@ -69,7 +66,7 @@ public static class CartPatch
     [HarmonyPostfix]
     public static void CanCheckout(Cart __instance, ref bool __result, ref string reason)
     {
-        if (!PlayerBackpack.Instance.IsUnlocked || !__result)
+        if (!__result)
             return;
 
         int totalBackpacks = 0;
@@ -79,8 +76,8 @@ public static class CartPatch
             var backpack = BackpackMod.Backpacks.Find(x => x.ShopListing.name == entry.Listing.name);
             if (backpack != null)
             {
-                var currentBackpack = PlayerBackpack.Instance.GetCurrentBackpack();
-                if (currentBackpack?.Slots > backpack.Slots)
+                if (PlayerBackpack.Instance.IsBackpackEquipped &&
+                    PlayerBackpack.Instance.GetCurrentBackpackSlots() > backpack.Slots)
                 {
                     reason = "You cannot buy a backpack with less slots than your current one.";
                     __result = false;

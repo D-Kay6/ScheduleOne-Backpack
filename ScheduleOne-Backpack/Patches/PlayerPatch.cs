@@ -32,10 +32,10 @@ public static class PlayerPatch
     {
         var backpackStorage = __instance.GetBackpackStorage();
         var contents = new ItemSet(backpackStorage.ItemSlots).GetJSON();
-        var currentBackpack = PlayerBackpack.Instance.GetCurrentBackpack();
-        if (currentBackpack != null)
+        if (PlayerBackpack.Instance.IsBackpackEquipped)
         {
-            contents += $"|||{currentBackpack.Name}";
+            var currentBackpackName = PlayerBackpack.Instance.GetCurrentBackpackName();
+            contents += $"|||{currentBackpackName}";
         }
 
 #if IL2CPP

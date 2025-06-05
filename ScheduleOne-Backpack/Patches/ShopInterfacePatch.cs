@@ -25,7 +25,7 @@ public static class ShopInterfacePatch
     public static void GetAvailableSlots(ShopInterface __instance, ref List<ItemSlot> __result)
 #endif
     {
-        if (!PlayerBackpack.Instance.IsUnlocked)
+        if (!PlayerBackpack.Instance.IsBackpackEquipped)
             return;
 
         var loadingBayVehicle = __instance.GetLoadingBayVehicle();
