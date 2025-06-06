@@ -24,7 +24,7 @@ public static class BodySearchBehaviourPatch
     [HarmonyPrefix]
     public static bool SearchClean(BodySearchBehaviour __instance)
     {
-        if (!PlayerBackpack.Instance.IsUnlocked || !Configuration.Instance.EnableSearch)
+        if (!PlayerBackpack.Instance.IsBackpackEquipped || !Configuration.Instance.EnableSearch)
             return true;
 
         BodySearchScreen.Instance.onSearchClear.RemoveListener(new Action(__instance.SearchClean));

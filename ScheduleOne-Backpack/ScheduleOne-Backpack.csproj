@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -9,6 +9,12 @@
         <LangVersion>latest</LangVersion>
         <Configurations>MONO;IL2CPP</Configurations>
     </PropertyGroup>
+    <ItemGroup>
+      <None Remove="Assets\big.png" />
+      <None Remove="Assets\Icon.png" />
+      <None Remove="Assets\medium.png" />
+      <None Remove="Assets\small.png" />
+    </ItemGroup>
 
     <PropertyGroup>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -41,6 +47,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="Backpack.cs" />
         <Compile Include="BackpackMod.cs"/>
         <Compile Include="Config\ConfigSyncManager.cs"/>
         <Compile Include="Config\Configuration.cs"/>
@@ -53,13 +60,18 @@
         <Compile Include="Patches\ShopInterfacePatch.cs"/>
         <Compile Include="Patches\StorageMenuPatch.cs"/>
         <Compile Include="PlayerBackpack.cs"/>
+        <Compile Include="ShopManager.cs" />
         <Compile Include="Utility\Logger.cs"/>
         <Compile Include="Utility\PlayerExtensions.cs"/>
         <Compile Include="Utility\ResourceUtils.cs"/>
+
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="Assets\Icon.png"/>
+        <EmbeddedResource Include="Assets\big.png" />
+        <EmbeddedResource Include="Assets\Icon.png" />
+        <EmbeddedResource Include="Assets\medium.png" />
+        <EmbeddedResource Include="Assets\small.png" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(Configuration)' == 'IL2CPP'">
