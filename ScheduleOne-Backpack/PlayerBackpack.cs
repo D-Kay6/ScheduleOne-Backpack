@@ -14,7 +14,6 @@ using Il2CppScheduleOne.Tools;
 using Il2CppScheduleOne.UI;
 using Il2CppScheduleOne.UI.Phone;
 using Il2CppSystem.Linq;
-
 #elif MONO
 using ScheduleOne.DevUtilities;
 using ScheduleOne.ItemFramework;
@@ -26,7 +25,6 @@ using ScheduleOne.Storage;
 using ScheduleOne.Tools;
 using ScheduleOne.UI;
 using ScheduleOne.UI.Phone;
-using System.Reflection;
 #endif
 
 namespace Backpack;
@@ -46,9 +44,6 @@ public class PlayerBackpack : MonoBehaviour
     public PlayerBackpack(IntPtr ptr) : base(ptr)
     {
     }
-#elif MONO
-    private static readonly MethodInfo OpenStorageMenu = typeof(StorageMenu).GetMethod("Open", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new MissingMethodException("StorageMenu", "Open");
-    private static readonly MethodInfo SendStorageAccessor = typeof(StorageEntity).GetMethod("SendAccessor", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new MissingMethodException("StorageEntity", "SendAccessor");
 #endif
 
     public static PlayerBackpack Instance { get; private set; }
@@ -110,11 +105,10 @@ public class PlayerBackpack : MonoBehaviour
         storageMenu.SlotGridLayout.constraintCount = _storage.DisplayRowCount;
 #if IL2CPP
         storageMenu.Open(StorageName, string.Empty, _storage.Cast<IItemSlotOwner>());
-        _storage.SendAccessor(Player.Local.NetworkObject);
 #elif MONO
-        OpenStorageMenu.Invoke(storageMenu, [StorageName, string.Empty, _storage]);
-        SendStorageAccessor.Invoke(_storage, [Player.Local.NetworkObject]);
+        storageMenu.Open(StorageName, string.Empty, _storage);
 #endif
+        _storage.SendAccessor(Player.Local.NetworkObject);
     }
 
     public void Close()
@@ -123,11 +117,7 @@ public class PlayerBackpack : MonoBehaviour
             return;
 
         Singleton<StorageMenu>.Instance.CloseMenu();
-#if IL2CPP
         _storage.SendAccessor(null);
-#elif MONO
-        SendStorageAccessor.Invoke(_storage, [null]);
-#endif
     }
 
     public bool ContainsItemsOfInterest(EStealthLevel maxStealthLevel)
@@ -144,6 +134,9 @@ public class PlayerBackpack : MonoBehaviour
 
 #if IL2CPP
             var productInstance = itemSlot.ItemInstance.TryCast<ProductItemInstance>();
+#elif MONO
+            var productInstance = itemSlot.ItemInstance as ProductItemInstance;
+#endif
             if (productInstance == null)
             {
                 if (itemSlot.ItemInstance.Definition.legalStatus != ELegalStatus.Legal)
@@ -154,18 +147,6 @@ public class PlayerBackpack : MonoBehaviour
 
             if (productInstance.AppliedPackaging == null || productInstance.AppliedPackaging.StealthLevel <= maxStealthLevel)
                 return true;
-#elif MONO
-            if (itemSlot.ItemInstance is not ProductItemInstance productInstance)
-            {
-                if (itemSlot.ItemInstance.Definition.legalStatus != ELegalStatus.Legal)
-                    return true;
-
-                continue;
-            }
-
-            if (productInstance.AppliedPackaging == null || productInstance.AppliedPackaging.StealthLevel <= maxStealthLevel)
-                return true;
-#endif
         }
 
         return false;
@@ -224,7 +205,7 @@ public class PlayerBackpack : MonoBehaviour
 #if IL2CPP
             var itemSlot = removedSlots[new Index(i)].Cast<ItemSlot>();
 #elif MONO
-            var itemSlot = removedSlots[i];
+            var itemSlot = removedSlots[new Index(i)] as ItemSlot;
 #endif
             if (itemSlot?.ItemInstance == null)
                 continue;
@@ -269,8 +250,7 @@ public class PlayerBackpack : MonoBehaviour
 
             itemSlot.SetSlotOwner(_storage.Cast<IItemSlotOwner>());
 #elif MONO
-            var contentChangedMethod = _storage.GetType().GetMethod("ContentsChanged", BindingFlags.NonPublic | BindingFlags.Instance);
-            itemSlot.onItemDataChanged += () => contentChangedMethod?.Invoke(_storage, null);
+            itemSlot.onItemDataChanged += _storage.ContentsChanged;
             itemSlot.SetSlotOwner(_storage);
 #endif
         }

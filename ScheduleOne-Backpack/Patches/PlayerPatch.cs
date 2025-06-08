@@ -52,8 +52,13 @@ public static class PlayerPatch
         try
         {
             var backpackStorage = __instance.GetBackpackStorage();
-            var itemSet = ItemSet.Deserialize(backpackData);
-            backpackStorage.LoadFromItemSet(itemSet);
+            if (!ItemSet.TryDeserialize(backpackData, out var itemSet))
+            {
+                Logger.Error("Failed to deserialize backpack data.");
+                return;
+            }
+
+            itemSet.LoadTo(backpackStorage.ItemSlots);
         }
         catch (Exception e)
         {
@@ -84,8 +89,13 @@ public static class PlayerPatch
         try
         {
             var backpackStorage = __instance.GetBackpackStorage();
-            var itemSet = ItemSet.Deserialize(backpackData);
-            backpackStorage.LoadFromItemSet(itemSet);
+            if (!ItemSet.TryDeserialize(backpackData, out var itemSet))
+            {
+                Logger.Error("Failed to deserialize backpack data.");
+                return;
+            }
+
+            itemSet.LoadTo(backpackStorage.ItemSlots);
         }
         catch (Exception e)
         {
