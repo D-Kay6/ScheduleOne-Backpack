@@ -5,7 +5,7 @@ using Il2CppScheduleOne;
 using Backpack.Config;
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(Backpack.BackpackMod), "OG Backpack", "1.8.0", "D-Kay", "https://www.nexusmods.com/schedule1/mods/818")]
+[assembly: MelonInfo(typeof(Backpack.BackpackMod), "OG Backpack", "1.8.1", "D-Kay", "https://www.nexusmods.com/schedule1/mods/818")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 [assembly: AssemblyMetadata("NexusModID", "818")]
 

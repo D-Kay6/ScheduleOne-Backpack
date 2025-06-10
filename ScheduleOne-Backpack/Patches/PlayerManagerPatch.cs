@@ -25,10 +25,7 @@ public static class PlayerManagerPatch
 #if IL2CPP
         var dataPath = (Il2CppSystem.String) __instance.loadedPlayerDataPaths[new Index(__instance.loadedPlayerData.IndexOf(data))];
 #elif MONO
-        var traverser = new Traverse(__instance);
-        var loadedPlayerData = traverser.Field("loadedPlayerData").GetValue<List<PlayerData>>();
-        var loadedPlayerDataPaths = traverser.Field("loadedPlayerDataPaths").GetValue<List<string>>();
-        var dataPath = loadedPlayerDataPaths[loadedPlayerData.IndexOf(data)];
+        var dataPath = __instance.loadedPlayerDataPaths[__instance.loadedPlayerData.IndexOf(data)];
 #endif
         var loader = new PlayerLoader();
         if (!loader.TryLoadFile(dataPath, "Backpack", out var backpackString))

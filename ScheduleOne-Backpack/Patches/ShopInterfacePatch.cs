@@ -37,7 +37,7 @@ public static class ShopInterfacePatch
         for (var i = 0; i < items.Count; i++)
         {
 #if IL2CPP
-            var itemSlot = items[new Index(i)].Cast<ItemSlot>();
+            var itemSlot = items[new Index(i)].TryCast<ItemSlot>();
 #elif MONO
             var itemSlot = items[i];
 #endif

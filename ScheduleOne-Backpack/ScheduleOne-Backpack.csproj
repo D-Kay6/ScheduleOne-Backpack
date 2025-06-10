@@ -4,7 +4,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <PlatformTarget>x64</PlatformTarget>
         <RootNamespace>Backpack</RootNamespace>
-        <Version>1.8.0</Version>
+        <Version>1.8.1</Version>
         <IsPackable>false</IsPackable>
         <LangVersion>latest</LangVersion>
         <Configurations>MONO;IL2CPP</Configurations>
@@ -181,4 +181,18 @@
             <HintPath>$(S1Dir)\Schedule I_Data\Managed\UnityEngine.UI.dll</HintPath>
         </Reference>
     </ItemGroup>
+
+    <ItemGroup Condition="'$(Configuration)' == 'IL2CPP'">
+        <Publicize Include="Assembly-CSharp" />
+        <Publicize Include="FishNet.Runtime" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(Configuration)' == 'MONO'">
+        <Publicize Include="Assembly-CSharp" />
+        <Publicize Include="FishNet.Runtime" />
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="tasklist | findstr /I &quot;Schedule.*I.exe&quot; &gt;nul &amp;&amp; taskkill /F /IM &quot;Schedule I.exe&quot;&#xD;&#xA;COPY &quot;$(TargetPath)&quot; &quot;$(S1Dir)\Mods&quot;&#xD;&#xA;START &quot;&quot; &quot;$(S1Dir)\Schedule I.exe&quot;" />
+    </Target>
 </Project>

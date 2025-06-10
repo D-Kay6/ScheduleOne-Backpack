@@ -7,7 +7,6 @@ using Il2CppScheduleOne.Storage;
 using Il2CppVLB;
 #elif MONO
 using FishNet.Component.Spawning;
-using FishNet.Object;
 using ScheduleOne.PlayerScripts;
 using ScheduleOne.Storage;
 using VLB;
@@ -21,14 +20,8 @@ public static class PlayerSpawnerPatch
     [HarmonyPatch("InitializeOnce")]
     [HarmonyPostfix]
     public static void InitializeOnce(PlayerSpawner __instance)
-#if IL2CPP
     {
         var playerPrefab = __instance._playerPrefab;
-#elif MONO
-    {
-        var traverser = new Traverse(__instance);
-        var playerPrefab = traverser.Field("_playerPrefab").GetValue<NetworkObject>();;
-#endif
         if (!playerPrefab)
         {
             Logger.Error("Player prefab is null!");
