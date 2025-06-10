@@ -13,7 +13,7 @@ A storage expansion modification for Schedule I available on [Steam](https://sto
 
 ## Installation
 
-1. Ensure [MelonLoader](https://melonwiki.xyz/wiki/MelonLoader) is installed on your game.
+1. Ensure [MelonLoader](https://melonwiki.xyz/#/README) is installed on your game.
 2. Download the `Backpack.dll` file.
 3. Place the DLL in your Schedule I Mods folder.
 4. *(Optional)* Adjust the key binding by editing the `backpack.cfg` file located in the “UserData” folder.

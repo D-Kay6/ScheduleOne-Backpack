@@ -37,8 +37,6 @@ public static class PlayerSpawnerPatch
 
         Logger.Info("Adding backpack storage to player prefab...");
         var storage = player.gameObject.GetOrAddComponent<StorageEntity>();
-        storage.SlotCount = PlayerBackpack.MaxStorageSlots;
-        storage.DisplayRowCount = 8;
         storage.StorageEntityName = PlayerBackpack.StorageName;
         storage.MaxAccessDistance = float.PositiveInfinity;
         player.LocalGameObject.GetOrAddComponent<PlayerBackpack>();

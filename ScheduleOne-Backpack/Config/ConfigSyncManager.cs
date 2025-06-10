@@ -38,9 +38,7 @@ public static class ConfigSyncManager
     {
         var payload = new StringBuilder();
         payload.Append($"{ModVersion}[");
-        payload.Append($"{Configuration.Instance.UnlockLevel.Rank}:{Configuration.Instance.UnlockLevel.Tier},");
         payload.Append($"{Configuration.Instance.EnableSearch},");
-        payload.Append($"{Configuration.Instance.StorageSlots},");
         payload.Append(']');
 
         Logger.Info($"Syncing payload to clients: {payload}");
@@ -96,8 +94,6 @@ public static class ConfigSyncManager
             return;
         }
 
-        Configuration.Instance.UnlockLevel = new FullRank(rank, tier);
         Configuration.Instance.EnableSearch = bool.Parse(parts[2]);
-        Configuration.Instance.StorageSlots = int.Parse(parts[3]);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Backpack.Config;
+using Harmony;
+using Backpack.Config;
 using UnityEngine;
 
 #if IL2CPP
@@ -34,11 +35,14 @@ namespace Backpack;
 #endif
 public class PlayerBackpack : MonoBehaviour
 {
+
     public const string StorageName = "Backpack";
     public const int MaxStorageSlots = 128;
 
     private bool _backpackEnabled = true;
     private StorageEntity _storage;
+    private Backpack _equippedBackpack = null!;
+
 
 #if IL2CPP
     public PlayerBackpack(IntPtr ptr) : base(ptr)
@@ -48,13 +52,16 @@ public class PlayerBackpack : MonoBehaviour
 
     public static PlayerBackpack Instance { get; private set; }
 
-    public bool IsUnlocked => NetworkSingleton<LevelManager>.Instance.GetFullRank() >= Configuration.Instance.UnlockLevel;
     public bool IsOpen => Singleton<StorageMenu>.Instance.IsOpen && Singleton<StorageMenu>.Instance.TitleLabel.text == StorageName;
 #if IL2CPP
     public Il2CppSystem.Collections.Generic.List<ItemSlot> ItemSlots => _storage.ItemSlots.Cast<Il2CppSystem.Collections.Generic.IEnumerable<ItemSlot>>().ToList();
 #elif MONO
     public List<ItemSlot> ItemSlots => _storage.ItemSlots.ToList();
 #endif
+
+    public bool IsBackpackEquipped => _equippedBackpack != null;
+    public string GetCurrentBackpackName() => _equippedBackpack?.Name;
+    public int GetCurrentBackpackSlots() => _equippedBackpack.Slots;
 
     private void Awake()
     {
@@ -65,14 +72,12 @@ public class PlayerBackpack : MonoBehaviour
             return;
         }
 
-        Logger.Info("Configuring backpack storage...");
-        UpdateSize(Configuration.Instance.StorageSlots);
         OnStartClient(true);
     }
 
     private void Update()
     {
-        if (!_backpackEnabled || !IsUnlocked || !Input.GetKeyDown(Configuration.Instance.ToggleKey))
+        if (!_backpackEnabled || !Input.GetKeyDown(Configuration.Instance.ToggleKey))
             return;
 
         try
@@ -98,7 +103,7 @@ public class PlayerBackpack : MonoBehaviour
 
     public void Open()
     {
-        if (!_backpackEnabled || !IsUnlocked || Singleton<ManagementClipboard>.Instance.IsEquipped || Singleton<StorageMenu>.Instance.IsOpen || Phone.Instance.IsOpen)
+        if (!_backpackEnabled || _equippedBackpack == null || Singleton<ManagementClipboard>.Instance.IsEquipped || Singleton<StorageMenu>.Instance.IsOpen || Phone.Instance.IsOpen)
             return;
 
         var storageMenu = Singleton<StorageMenu>.Instance;
@@ -228,9 +233,9 @@ public class PlayerBackpack : MonoBehaviour
         _storage.SlotCount = newSize;
         _storage.DisplayRowCount = newSize switch
         {
-            <= 20 => (int) Math.Ceiling(newSize / 5.0),
-            <= 80 => (int) Math.Ceiling(newSize / 10.0),
-            _ => (int) Math.Ceiling(newSize / 16.0)
+            <= 20 => (int)Math.Ceiling(newSize / 5.0),
+            <= 80 => (int)Math.Ceiling(newSize / 10.0),
+            _ => (int)Math.Ceiling(newSize / 16.0)
         };
 
         if (_storage.ItemSlots.Count > newSize)
@@ -244,9 +249,9 @@ public class PlayerBackpack : MonoBehaviour
             var itemSlot = new ItemSlot();
 #if IL2CPP
             if (itemSlot.onItemDataChanged == null)
-                itemSlot.onItemDataChanged = (Il2CppSystem.Action) _storage.ContentsChanged;
+                itemSlot.onItemDataChanged = (Il2CppSystem.Action)_storage.ContentsChanged;
             else
-                itemSlot.onItemDataChanged.CombineImpl((Il2CppSystem.Action) _storage.ContentsChanged);
+                itemSlot.onItemDataChanged.CombineImpl((Il2CppSystem.Action)_storage.ContentsChanged);
 
             itemSlot.SetSlotOwner(_storage.Cast<IItemSlotOwner>());
 #elif MONO
@@ -272,6 +277,28 @@ public class PlayerBackpack : MonoBehaviour
         }
 
         Instance = this;
+    }
+    public void EquipBackpackByName(string backpackName)
+    {
+        var backpack = BackpackMod.Backpacks.FirstOrDefault(x => x.ShopListing.name == backpackName);
+        if (backpack == null)
+        {
+            Logger.Error("Backpack with name {0} not found.", backpackName);
+            return;
+        }
+        _equippedBackpack = backpack;
+        _storage.StorageEntitySubtitle = backpack.Name;
+
+        SetBackpackEnabled(true);
+        var diff = backpack.Slots - _storage.SlotCount;
+        if (diff > 0)
+        {
+            Upgrade(diff);
+        }
+        else if (diff < 0)
+        {
+            Downgrade(-diff, true);
+        }
     }
 
     private void OnDestroy()

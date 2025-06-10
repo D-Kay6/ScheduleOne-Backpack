@@ -32,6 +32,11 @@ public static class PlayerPatch
     {
         var backpackStorage = __instance.GetBackpackStorage();
         var contents = new ItemSet(backpackStorage.ItemSlots).GetJSON();
+        if (PlayerBackpack.Instance.IsBackpackEquipped)
+        {
+            var currentBackpackName = PlayerBackpack.Instance.GetCurrentBackpackName();
+            contents += $"|||{currentBackpackName}";
+        }
 
 #if IL2CPP
         __instance.Cast<ISaveable>().WriteSubfile(parentFolderPath, "Backpack", contents);
@@ -48,11 +53,20 @@ public static class PlayerPatch
         if (!__instance.Loader.TryLoadFile(containerPath, "Backpack", out var backpackData))
             return;
 
-        Logger.Info("Loading local backpack data.");
         try
         {
+            var backpackSplitData = backpackData.Split("|||");
+            var backpackName = backpackSplitData.LastOrDefault();
+            if (!string.IsNullOrEmpty(backpackName))
+            {
+                var backpack = BackpackMod.Backpacks.FirstOrDefault(b => b.Name == backpackName);
+                if (backpack != null)
+                {
+                    PlayerBackpack.Instance.EquipBackpackByName(backpack.Name);
+                }
+            }
             var backpackStorage = __instance.GetBackpackStorage();
-            if (!ItemSet.TryDeserialize(backpackData, out var itemSet))
+            if (!ItemSet.TryDeserialize(backpackSplitData.FirstOrDefault(), out var itemSet))
             {
                 Logger.Error("Failed to deserialize backpack data.");
                 return;
@@ -125,6 +139,27 @@ public static class PlayerPatch
     {
         Logger.Info("Exiting all backpacks");
         PlayerBackpack.Instance.SetBackpackEnabled(false);
+    }
+
+    [HarmonyPatch("PassOutRecovery")]
+    [HarmonyPrefix]
+    public static void PassOutRecovery()
+    {
+        PlayerBackpack.Instance.SetBackpackEnabled(true);
+    }
+
+    [HarmonyPatch("PassOut")]
+    [HarmonyPrefix]
+    public static void PassOut()
+    {
+        PlayerBackpack.Instance.SetBackpackEnabled(false);
+    }
+
+    [HarmonyPatch("OnRevived")]
+    [HarmonyPrefix]
+    public static void OnRevived()
+    {
+        PlayerBackpack.Instance.SetBackpackEnabled(true);
     }
 
     [HarmonyPatch("OnDied")]
