@@ -1,11 +1,13 @@
 ﻿using HarmonyLib;
 
 #if IL2CPP
+using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.Persistence;
 using Il2CppScheduleOne.Persistence.Datas;
 using Il2CppScheduleOne.PlayerScripts;
 using SaveFileList = Il2CppSystem.Collections.Generic.List<string>;
 #elif MONO
+using ScheduleOne.ItemFramework;
 using ScheduleOne.Persistence;
 using ScheduleOne.Persistence.Datas;
 using ScheduleOne.PlayerScripts;
@@ -28,13 +30,39 @@ public static class PlayerPatch
         __instance.LocalExtraFiles.Add("Backpack");
     }
 
+    // Set once backpack contents have been received for the local player this session.
+    // Used to avoid overwriting an existing save file with an empty backpack if loading failed.
+    internal static bool BackpackDataLoaded;
+
     [HarmonyPatch("WriteData")]
     [HarmonyPostfix]
     public static void WriteData(Player __instance, string parentFolderPath, SaveFileList __result)
     {
+        const string fileName = "Backpack.json";
         var backpackStorage = __instance.GetBackpackStorage();
         if (backpackStorage == null)
             return;
+
+        var isEmpty = true;
+        for (var i = 0; i < backpackStorage.ItemSlots.Count; i++)
+        {
+#if IL2CPP
+            var slot = backpackStorage.ItemSlots[new Index(i)].Cast<ItemSlot>();
+#elif MONO
+            var slot = backpackStorage.ItemSlots[i];
+#endif
+            if (slot?.ItemInstance == null)
+                continue;
+            isEmpty = false;
+            break;
+        }
+
+        if (!BackpackDataLoaded && isEmpty && File.Exists(Path.Combine(parentFolderPath, fileName)))
+        {
+            Logger.Warning("Backpack data was never loaded this session; keeping existing backpack file instead of overwriting it with an empty backpack.");
+            __result?.Add(fileName);
+            return;
+        }
 
         var contents = new ItemSet(backpackStorage.ItemSlots).GetJSON();
 
@@ -45,7 +73,7 @@ public static class PlayerPatch
         var written = instance.WriteSubfile(parentFolderPath, "Backpack", contents);
 #endif
         // Register the file as approved so the save system does not delete it as stale.
-        __result?.Add(string.IsNullOrEmpty(written) ? "Backpack.json" : Path.GetFileName(written));
+        __result?.Add(string.IsNullOrEmpty(written) ? fileName : Path.GetFileName(written));
     }
 
     [HarmonyPatch("LoadInventory")]
@@ -67,6 +95,7 @@ public static class PlayerPatch
 
         contentsString = backpackString[0];
         var backpackData = backpackString[1];
+        BackpackDataLoaded = true;
         Logger.Info("Loading backpack data from network.");
         try
         {
