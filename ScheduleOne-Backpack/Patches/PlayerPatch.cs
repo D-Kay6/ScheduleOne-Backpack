@@ -4,10 +4,12 @@
 using Il2CppScheduleOne.Persistence;
 using Il2CppScheduleOne.Persistence.Datas;
 using Il2CppScheduleOne.PlayerScripts;
+using SaveFileList = Il2CppSystem.Collections.Generic.List<string>;
 #elif MONO
 using ScheduleOne.Persistence;
 using ScheduleOne.Persistence.Datas;
 using ScheduleOne.PlayerScripts;
+using SaveFileList = System.Collections.Generic.List<string>;
 #endif
 
 namespace Backpack.Patches;
@@ -28,42 +30,22 @@ public static class PlayerPatch
 
     [HarmonyPatch("WriteData")]
     [HarmonyPostfix]
-    public static void WriteData(Player __instance, string parentFolderPath)
+    public static void WriteData(Player __instance, string parentFolderPath, SaveFileList __result)
     {
         var backpackStorage = __instance.GetBackpackStorage();
+        if (backpackStorage == null)
+            return;
+
         var contents = new ItemSet(backpackStorage.ItemSlots).GetJSON();
 
 #if IL2CPP
-        __instance.Cast<ISaveable>().WriteSubfile(parentFolderPath, "Backpack", contents);
+        var written = __instance.Cast<ISaveable>().WriteSubfile(parentFolderPath, "Backpack", contents);
 #elif MONO
         ISaveable instance = __instance;
-        instance.WriteSubfile(parentFolderPath, "Backpack", contents);
+        var written = instance.WriteSubfile(parentFolderPath, "Backpack", contents);
 #endif
-    }
-
-    [HarmonyPatch("Load", typeof(PlayerData), typeof(string))]
-    [HarmonyPrefix]
-    public static void Load(Player __instance, PlayerData data, string containerPath)
-    {
-        if (!__instance.Loader.TryLoadFile(containerPath, "Backpack", out var backpackData))
-            return;
-
-        Logger.Info("Loading local backpack data.");
-        try
-        {
-            var backpackStorage = __instance.GetBackpackStorage();
-            if (!ItemSet.TryDeserialize(backpackData, out var itemSet))
-            {
-                Logger.Error("Failed to deserialize backpack data.");
-                return;
-            }
-
-            itemSet.LoadTo(backpackStorage.ItemSlots);
-        }
-        catch (Exception e)
-        {
-            Logger.Error($"Error loading backpack data: {e.Message}");
-        }
+        // Register the file as approved so the save system does not delete it as stale.
+        __result?.Add(string.IsNullOrEmpty(written) ? "Backpack.json" : Path.GetFileName(written));
     }
 
     [HarmonyPatch("LoadInventory")]
@@ -103,28 +85,25 @@ public static class PlayerPatch
         }
     }
 
-    [HarmonyPatch("Activate")]
-    [HarmonyPrefix]
-    public static void Activate()
+    // Player.Activate/Deactivate were removed in game 0.4.x. The backpack is enabled by default and
+    // only disabled on death/exit, so re-enable it when the local player is revived.
+    [HarmonyPatch("OnRevived")]
+    [HarmonyPostfix]
+    public static void OnRevived(Player __instance)
     {
-        Logger.Info("Activating backpack");
-        PlayerBackpack.Instance.SetBackpackEnabled(true);
-    }
+        if (__instance.Owner == null || !__instance.Owner.IsLocalClient)
+            return;
 
-    [HarmonyPatch("Deactivate")]
-    [HarmonyPrefix]
-    public static void Deactivate()
-    {
-        Logger.Info("Deactivating backpack");
-        PlayerBackpack.Instance.SetBackpackEnabled(false);
+        Logger.Info("Player revived, enabling backpack");
+        PlayerBackpack.Instance.SetBackpackEnabled(true);
     }
 
     [HarmonyPatch("ExitAll")]
     [HarmonyPrefix]
     public static void ExitAll()
     {
-        Logger.Info("Exiting all backpacks");
-        PlayerBackpack.Instance.SetBackpackEnabled(false);
+        // Close only; with Activate gone there is no hook that would re-enable a disabled backpack.
+        PlayerBackpack.Instance?.Close();
     }
 
     [HarmonyPatch("OnDied")]

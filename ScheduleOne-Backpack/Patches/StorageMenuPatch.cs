@@ -47,12 +47,16 @@ public static class StorageMenuPatch
         __instance.SlotsUIs = slots;
     }
 
-    [HarmonyPatch("Open", [typeof(string), typeof(string), typeof(IItemSlotOwner)])]
+#if IL2CPP
+    [HarmonyPatch("Open", [typeof(string), typeof(string), typeof(IItemSlotOwner), typeof(Il2CppSystem.Action)])]
+#elif MONO
+    [HarmonyPatch("Open", [typeof(string), typeof(string), typeof(IItemSlotOwner), typeof(Action)])]
+#endif
     [HarmonyPostfix]
-    public static void Open(StorageMenu __instance, string title, string subtitle, IItemSlotOwner owner)
+    public static void Open(StorageMenu __instance)
     {
         var spacing = __instance.SlotGridLayout.cellSize.y + __instance.SlotGridLayout.spacing.y;
-        __instance.CloseButton.anchoredPosition = new Vector2(0f, __instance.SlotGridLayout.constraintCount * -spacing - __instance.CloseButton.sizeDelta.y);
+        __instance.CloseButtonContainer.anchoredPosition = new Vector2(0f, __instance.SlotGridLayout.constraintCount * -spacing - __instance.CloseButtonContainer.sizeDelta.y);
         if (__instance.SlotGridLayout.constraintCount <= 4)
             return;
 

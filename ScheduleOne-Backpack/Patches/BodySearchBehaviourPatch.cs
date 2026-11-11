@@ -38,7 +38,7 @@ public static class BodySearchBehaviourPatch
 
     private static IEnumerator CheckForItems(BodySearchBehaviour behaviour)
     {
-        behaviour.officer.dialogueHandler.ShowWorldspaceDialogue("Hold on, let me see your backpack as well.", 5f);
+        behaviour.officer.DialogueHandler.ShowWorldspaceDialogue("Hold on, let me see your backpack as well.", 5f);
         yield return new WaitForSeconds(3f);
         BodySearchScreen.Instance.IsOpen = false;
         behaviour.ConcludeSearch(!PlayerBackpack.Instance.ContainsItemsOfInterest(behaviour.MaxStealthLevel));
