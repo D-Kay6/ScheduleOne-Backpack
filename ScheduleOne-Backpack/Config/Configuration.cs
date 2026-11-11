@@ -21,7 +21,9 @@ public class Configuration
     private readonly MelonPreferences_Entry<bool> _enableSearchEntry;
 
     private readonly MelonPreferences_Category _backpackCategory;
-    private readonly MelonPreferences_Entry<FullRank> _unlockLevelEntry;
+    // FullRank (a struct) can't be shown by in-game mod menus, so rank and tier are separate entries.
+    private readonly MelonPreferences_Entry<ERank> _unlockRankEntry;
+    private readonly MelonPreferences_Entry<int> _unlockTierEntry;
     private readonly MelonPreferences_Entry<int> _storageSlotsEntry;
 
     public Configuration()
@@ -33,7 +35,8 @@ public class Configuration
 
         _backpackCategory = MelonPreferences.CreateCategory("Backpack");
         _backpackCategory.SetFilePath(_configFile, false);
-        _unlockLevelEntry = _backpackCategory.CreateEntry("UnlockLevel", new FullRank(ERank.Hoodlum, 1), "Required level to unlock");
+        _unlockRankEntry = _backpackCategory.CreateEntry("UnlockRank", ERank.Hoodlum, "Required rank to unlock (Street_Rat = available from the start)");
+        _unlockTierEntry = _backpackCategory.CreateEntry("UnlockTier", 1, "Required tier within the rank to unlock (1-5)");
         _storageSlotsEntry = _backpackCategory.CreateEntry("StorageSlots", 12, "Number of total storage slots");
     }
 
@@ -52,7 +55,7 @@ public class Configuration
     {
         ToggleKey = _toggleKeyEntry.Value;
         EnableSearch = _enableSearchEntry.Value;
-        UnlockLevel = new FullRank(_unlockLevelEntry.Value.Rank, Math.Clamp(_unlockLevelEntry.Value.Tier, 1, 5));
+        UnlockLevel = new FullRank(_unlockRankEntry.Value, Math.Clamp(_unlockTierEntry.Value, 1, 5));
         StorageSlots = Math.Clamp(_storageSlotsEntry.Value, 1, PlayerBackpack.MaxStorageSlots);
     }
 
@@ -60,7 +63,8 @@ public class Configuration
     {
         _toggleKeyEntry.Value = ToggleKey;
         _enableSearchEntry.Value = EnableSearch;
-        _unlockLevelEntry.Value = new FullRank(UnlockLevel.Rank, Math.Clamp(UnlockLevel.Tier, 1, 5));
+        _unlockRankEntry.Value = UnlockLevel.Rank;
+        _unlockTierEntry.Value = Math.Clamp(UnlockLevel.Tier, 1, 5);
         _storageSlotsEntry.Value = Math.Clamp(StorageSlots, 1, PlayerBackpack.MaxStorageSlots);
         MelonPreferences.Save();
     }

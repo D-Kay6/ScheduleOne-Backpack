@@ -4,7 +4,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <PlatformTarget>x64</PlatformTarget>
         <RootNamespace>Backpack</RootNamespace>
-        <Version>1.8.1</Version>
+        <Version>1.8.2</Version>
         <IsPackable>false</IsPackable>
         <LangVersion>latest</LangVersion>
         <Configurations>MONO;IL2CPP</Configurations>
@@ -18,6 +18,7 @@
     <PropertyGroup Condition="'$(Configuration)' == 'IL2CPP'">
         <TargetFramework>net6.0</TargetFramework>
         <AssemblyName>Backpack</AssemblyName>
+        <DefineConstants>$(DefineConstants);IL2CPP</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'MONO'">
@@ -77,6 +78,9 @@
         </Reference>
         <Reference Include="Assembly-CSharp">
             <HintPath>$(S1Dir)\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="Il2CppScheduleOne.Core">
+            <HintPath>$(S1Dir)\MelonLoader\Il2CppAssemblies\Il2CppScheduleOne.Core.dll</HintPath>
         </Reference>
         <Reference Include="Il2Cppcom.rlabrecque.steamworks.net">
             <HintPath>$(S1Dir)\MelonLoader\Il2CppAssemblies\Il2Cppcom.rlabrecque.steamworks.net.dll</HintPath>
@@ -172,6 +176,7 @@
 
     <ItemGroup Condition="'$(Configuration)' == 'IL2CPP'">
         <Publicize Include="Assembly-CSharp" />
+        <Publicize Include="Il2CppScheduleOne.Core" />
         <Publicize Include="FishNet.Runtime" />
     </ItemGroup>
 

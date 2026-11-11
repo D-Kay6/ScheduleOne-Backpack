@@ -3,6 +3,7 @@ using UnityEngine;
 
 #if IL2CPP
 using MelonLoader;
+using Il2CppScheduleOne.Core.Items.Framework;
 using Il2CppScheduleOne.DevUtilities;
 using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.Levelling;
@@ -104,7 +105,7 @@ public class PlayerBackpack : MonoBehaviour
         var storageMenu = Singleton<StorageMenu>.Instance;
         storageMenu.SlotGridLayout.constraintCount = _storage.DisplayRowCount;
 #if IL2CPP
-        storageMenu.Open(StorageName, string.Empty, _storage.Cast<IItemSlotOwner>());
+        storageMenu.Open(_storage.Cast<IItemSlotOwner>(), StorageName, string.Empty);
 #elif MONO
         storageMenu.Open(StorageName, string.Empty, _storage);
 #endif
